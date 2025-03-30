@@ -1,0 +1,98 @@
+# 第二课指北React前端架构迁移
+
+1. Solv-libs 私仓
+2. Solv-libs State
+3. Solv Components
+4. SolvApp & React
+
+##  solv-utils 私仓
+
+### Lerna核心命令大全
+
+#### 项目初始化
+
+1. lerna init                 # 初始化项目
+2. lerna create core   # 添加新项目
+3. lerna add xxx         # 安装依赖
+4. lerna link                # packages项目依赖
+
+#### 开发测试
+
+5. lerna exec.             # 执行linux命令
+6. lerna run。           # 执行npm命令
+7. lerna clean            # 清空依赖
+8. lerna bootstrap    # 重装依赖
+
+#### 发布上线
+
+9. lerna version       # 管理版本号
+10. lerna changed     # 查看变更
+11. lerna diff              # 查看diff
+12. lerna publish      #  发布项目
+
+### 私仓部署核心命令[上]
+
+1. ~/.config/verdaccio 配置文件地址
+
+2. 底部listen: 0.0.0.0:4873 阿里云端口号
+
+3. verdaccio 或者 pm2 start verdaccio进行测试
+
+4. https://""verdaccio.org/zh-cn/docs/webui/ 页面配置
+
+5. 仓库文件 ~/.local/share/verdaccio/storage/
+
+6. npm root -g 查看全局包地址索引
+
+7. 初始化项目 npm init -"scope <scope name>
+
+8. 为域(scope添加用户) 
+
+   > npm adduser -"registry=<registry> -"scope=<scope
+   >
+   > name>
+
+### 私仓部署核心命令[中]
+
+1. npm adduser –registry http://localhost:4873
+2. npm login –registry http://localhost:4873
+3. npm unpublish yd-libs  —— foce
+4. pnpm install @solv-utils/core -D
+5. pnpm config set registry 地址
+6. nrm add laoyuan http://1270.0.1:4873
+7. nrm use laoyuan或者直接 配置
+8. 下载配置.npmrc 发布配置package.json(.npmrc优先)
+
+### 私仓部署核心命令[下]monorepo
+
+1. pnpm i xxx —filter @solv-utils/demos
+2. lerna add @solv-utils/core packages/demos/
+3. pnpm add lodash -r/-w 为每个项目或全局添加依赖 
+4. pnpm --filter "@yideng/core" dev
+5. lerna run test —scope=@solv-utils/core 
+6. lerna publish from-package 初次发版
+7. lerna changed 发版前校验需要更改的包 8.备选技术栈 rush、https://""nx.dev/
+
+### 单元测试覆盖率
+
+> Ponicode
+
+## xState与状态机
+
+1. Transitions and events 
+2. 初始状态和最终状态
+
+## Xstate与状态机-复合状态、原子状态、并行状态
+
+3. 复合状态是可以包含更多状态的状态，也称为子状态。
+4. 并行状态是一种复合状态，其中所有子状态(也称为区域)
+   同时处于活动状态
+
+## React技术细节
+
+1. 组件如果被嵌套外层添加memo
+2. 组件传递的props是对象使用atom
+3. 方法如需被传递外层添加useCallback
+4. 页面副作用使用useEffect
+5. hooks尽量自己去完善 基于已有的fork
+6. 注意webpack和其他生态的坑

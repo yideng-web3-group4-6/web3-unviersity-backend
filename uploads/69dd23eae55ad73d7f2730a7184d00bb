@@ -1,0 +1,104 @@
+# 第一课讲给大前端工程师的ServerLess
+
+
+
+> 面试：基础素质、spdy原理、场景式算法、计算机基础原理
+>
+> react Ts wenpack5 
+>
+> 阶段一 
+>
+> react ts wenpack 前端架构设计 私仓 组件库 libs。状态及 设计前端
+>
+> 阶段二 
+>
+> 图形学实战  WebAi rust
+
+libUv原理，部署同构JS问题 =>FSS
+
+## 掌握技术
+
+1. Node
+2. webpack
+3. graphql（一种用于 API 的查询语言，过滤或合并API请求，https://graphql.cn/）
+4. React
+5. cssNext
+6. github（拦截 CI-CD工程化管理）
+7. TS
+8. docker
+
+
+
+## BFF ->  SFF（Serverless For Frontend）
+
+> https://blog.csdn.net/xgangzai/article/details/119792195
+
+## FAAS （Function as a service）
+
+> （lammada）函数即服务，每一个函数都是一个服务，函数可以由任何语言编写，除此 之外不需要关心任何运维细节，比如:计算资源、弹性扩容，而且可以按 量计费，且支持事件驱动。业界大云厂商都支持 FAAS，各自都有一套工 作台、或者可视化工作流来管理这些函数。
+
+## BAAS（Backend as a service）
+
+> 后端及服务，就是集成了许多中间件技术，可以无视环境调用服 务，比如数据即服务(数据库服务)，缓存服务等。虽然下面还 有很多 XASS，但组成 Serverless 概念的只有 FAAS + BAAS。
+
+## PAAS（Platform as a servic）
+
+> 平台即服务，用户只要上传源代码就可以自动持续集成并享受高 可用服务，如果速度足够快，可以认为是类似 Serverless。但随 着以 Docker 为代表的容器技术兴起，以容器为粒度的 PASS 部 署逐渐成为主流，是最常用的应用部署方式。比如中间件、数据 库、操作系统等。
+
+## DAAS（Data as a service）
+
+> 数据即服务，将数据采集、治理、聚合、服务打包起来提供出 去。DASS 服务可以应用 Serverless 的架构。
+
+## 概念
+
+> Saas ==>PaaS==>IaaS
+>
+> 可控性从弱至强
+>
+> 面向终端客户 ==> 面向开发者==>面向运维人员==>物理机
+>
+> 周围用FaaS填充
+
+## 先行技术方案互相对比
+
+1. 阿里云 
+
+   > https://www.aliyun.co
+   >
+   > 国内为数不多的实践ServerLess的云平 台，但是现阶段开发体验相对较差。可以内部文件直接传上去，或者选模版
+
+2. 亚马逊
+
+   > https://serverless.com
+   >
+   > 亚马逊云，开发体验更好。有更完整的 Demo和实际的代码，做了一层隔离层
+
+3. cloudflare
+
+   > https://www.cloudflare.com/zh-cn/
+   >
+   > 让前后端链接在一起真正的云化，利用 Service Worker部署到边缘服务器上，nodeModule与JS 打包在一起，可以加速区块链项目 web3.0解析加速，部分node module不支持，openGL被封装过，所以不支持，pages配置带CI-CD
+
+## BFF架构
+
+WEB前端前置==》虚拟机BFF=数据编排=〉
+
+## SFF
+
+>  FaaS 推荐无状态的函数。就是函数不可改变 Immutable。就是说一个函数只要参数固定，返回的结果也必须是固定的
+
+## ServerLess介绍
+
+优点：无需管理、自动负载、监控、快速上线、快速开发、无语言障碍
+
+缺点：学习成本、迁移成本、冷启动的把控、紧紧的“拥抱”了某个云
+
+### work-box
+
+service Woker 对数据产生缓存 sw.js 
+
+现代JS 必须经过三个东西：解释器，中间帮助解释的、编译器
+
+# 问题
+
+http强缓？本地缓存？workBox离线缓存项目中怎么利用 核心区别是什么
