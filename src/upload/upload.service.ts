@@ -8,9 +8,10 @@ export class UploadService {
   private readonly logger = new Logger(UploadService.name);
   private s3Client: S3Client;
   private readonly bucketName: string;
+  private readonly region: string;
 
   constructor(private configService: ConfigService) {
-    const region = this.configService.get<string>('AWS_REGION');
+    this.region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.configService.get<string>(
       'AWS_SECRET_ACCESS_KEY',
@@ -18,20 +19,22 @@ export class UploadService {
     this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
 
     this.logger.debug(
-      `AWS Config - Region: ${region}, Bucket: ${this.bucketName}`,
+      `AWS Config - Region: ${this.region}, Bucket: ${this.bucketName}`,
     );
 
     this.s3Client = new S3Client({
-      region,
+      region: this.region,
       credentials: {
         accessKeyId,
         secretAccessKey,
       },
+      signingRegion: this.region,
+      forcePathStyle: true,
     });
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    const key = `${Date.now()}-${file.originalname}`;
+    const key = `uploads/${Date.now()}-${file.originalname}`;
     this.logger.debug(
       `Attempting to upload file: ${key} to bucket: ${this.bucketName}`,
     );
@@ -44,11 +47,12 @@ export class UploadService {
           Key: key,
           Body: file.buffer,
           ContentType: file.mimetype,
+          ServerSideEncryption: 'AES256', // 使用 S3 托管密钥进行加密
         },
       });
 
       await upload.done();
-      const fileUrl = `https://${this.bucketName}.s3.amazonaws.com/${key}`;
+      const fileUrl = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
       this.logger.debug(`File uploaded successfully: ${fileUrl}`);
       return fileUrl;
     } catch (error) {
