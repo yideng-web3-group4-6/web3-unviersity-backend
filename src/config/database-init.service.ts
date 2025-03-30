@@ -9,6 +9,12 @@ export class DatabaseInitService {
   constructor(private configService: ConfigService) {}
 
   async initDatabase() {
+    // 在生产环境下跳过本地数据库初始化
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.log('生产环境下跳过本地数据库初始化');
+      return;
+    }
+
     const host = this.configService.get('DB_HOST', 'localhost');
     const port = this.configService.get('DB_PORT', 3306);
     const username = this.configService.get('DB_USERNAME', 'root');
