@@ -9,8 +9,8 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { verifyMessage } from '@ethersproject/wallet';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { verifyMessage } from 'ethers/lib/utils';
 
 @Injectable()
 export class UserService {
