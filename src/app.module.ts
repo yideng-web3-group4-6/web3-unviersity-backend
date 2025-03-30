@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VideoModule } from './video/video.module';
 import { UserModule } from './user/user.module';
 import { getDatabaseConfig } from './config/database.config';
+import { ArticleModule } from './article/article.module';
 import { getEnvConfig } from './config/env.config';
 import { DatabaseInitService } from './config/database-init.service';
 
@@ -22,6 +23,7 @@ import { DatabaseInitService } from './config/database-init.service';
       },
     }),
     VideoModule,
+    ArticleModule,
     UserModule,
   ],
   providers: [DatabaseInitService],
