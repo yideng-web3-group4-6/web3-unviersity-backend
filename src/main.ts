@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DatabaseInitService } from './config/database-init.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // 初始化数据库
+  const databaseInitService = app.get(DatabaseInitService);
+  await databaseInitService.initDatabase();
 
   // 启用跨域以及全局路径前缀
   app.enableCors();
