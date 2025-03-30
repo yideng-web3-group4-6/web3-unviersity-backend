@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VideoModule } from './video/video.module';
 import { UserModule } from './user/user.module';
 import { getDatabaseConfig } from './config/database.config';
+import { User } from './user/entities/user.entity';
+import { ArticleModule } from './article/article.module';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { getDatabaseConfig } from './config/database.config';
       useFactory: getDatabaseConfig,
     }),
     VideoModule,
+    ArticleModule,
     UserModule,
   ],
 })
