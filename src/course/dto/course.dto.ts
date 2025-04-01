@@ -151,7 +151,7 @@ export class CourseDetailDto extends CourseListItemDto {
     description: '视频URL',
     example: 'https://example.com/video.mp4',
   })
-  videoUrl: string;
+  fileUrl: string;
 }
 
 export class CourseListApiResponse {
@@ -219,4 +219,58 @@ export class CourseListQueryDto {
   @Min(1)
   @Max(100)
   pageSize?: number = 10;
+}
+
+export class CourseDetailByFileIdDto {
+  @ApiProperty({
+    description: '文件ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  fileId: string;
+}
+
+export class CourseDetailByFileIdResponseDto {
+  @ApiProperty({
+    description: '视频URL',
+    example: 'https://example.com/video.mp4',
+  })
+  videoUrl: string;
+
+  @ApiProperty({
+    description: '文件名',
+    example: 'example.mp4',
+  })
+  fileName: string;
+
+  @ApiProperty({
+    description: '文件大小',
+    example: 1024000,
+  })
+  size: number;
+
+  @ApiProperty({
+    description: '文件类型',
+    example: 'video/mp4',
+  })
+  mimeType: string;
+}
+
+export class CourseDetailByFileIdApiResponse {
+  @ApiProperty({
+    description: '状态码',
+    example: 200,
+  })
+  code: number;
+
+  @ApiProperty({
+    description: '状态描述',
+    example: 'success',
+  })
+  message: string;
+
+  @ApiProperty({
+    description: '响应数据',
+    type: CourseDetailByFileIdResponseDto,
+  })
+  data: CourseDetailByFileIdResponseDto;
 }
