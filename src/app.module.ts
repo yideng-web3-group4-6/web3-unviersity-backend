@@ -4,14 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { getDatabaseConfig } from './config/database.config';
 import { ArticleModule } from './article/article.module';
-import { getEnvConfig } from './config/env.config';
+import { AppConfigModule } from './config/config.module';
 import { DatabaseInitService } from './config/database-init.service';
 import { UploadModule } from './upload/upload.module';
 import { CourseModule } from './course/course.module';
+
 @Module({
   imports: [
-    // 加载 .env 文件中的环境变量，并全局生效
-    ConfigModule.forRoot(getEnvConfig()),
+    // 导入配置模块
+    AppConfigModule,
     // 使用异步工厂方法构建 TypeORM 配置，并通过 ConfigService 读取环境变量
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
