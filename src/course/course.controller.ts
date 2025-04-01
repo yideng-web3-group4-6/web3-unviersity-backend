@@ -11,7 +11,7 @@ import {
 
 @ApiTags('课程管理')
 @Controller('course')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
