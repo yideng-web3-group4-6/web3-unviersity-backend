@@ -77,7 +77,7 @@ export class UploadController {
     }
   }
 
-  @Get(':fileId/url')
+  @Get(':fileId')
   @ApiOperation({ summary: '获取文件的预签名URL' })
   @ApiParam({ name: 'fileId', description: '文件ID' })
   @ApiQuery({
