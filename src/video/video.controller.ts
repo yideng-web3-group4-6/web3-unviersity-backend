@@ -6,15 +6,14 @@ import {
   UseInterceptors,
   Body,
   BadRequestException,
-  UseGuards,
   Req,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VideoService } from './video.service';
-import { AuthGuard } from '@nestjs/passport';
 import { S3Service } from '../services/s3.service';
 import {
   ApiTags,
@@ -24,9 +23,16 @@ import {
   ApiResponse,
   ApiSecurity,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import {
+  VideoUploadConfirmDto,
+  VideoResponse,
+  ApiResponse as VideoApiResponse,
+} from './dto/video.dto';
 
 @ApiTags('视频管理')
 @Controller('video')
+@UseGuards(AuthGuard('jwt'))
 export class VideoController {
   constructor(
     private readonly videoService: VideoService,
@@ -37,7 +43,6 @@ export class VideoController {
    * 视频上传接口（需要登录，携带 JWT token）
    */
   @Post('upload')
-  // @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: '上传视频到 AWS S3' })
   @ApiSecurity('bearer')
   @ApiConsumes('multipart/form-data')
@@ -106,5 +111,34 @@ export class VideoController {
     } catch (error) {
       throw new BadRequestException('视频上传失败：' + error.message);
     }
+  }
+
+  @Post('confirm')
+  @ApiOperation({
+    summary: '确认视频上传',
+    description: '确认视频上传并保存视频信息到数据库',
+  })
+  @ApiBody({
+    type: VideoUploadConfirmDto,
+    description: '视频确认信息',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '视频确认成功',
+    type: VideoResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '无效的请求参数',
+  })
+  async confirmVideoUpload(
+    @Body() videoData: VideoUploadConfirmDto,
+  ): Promise<VideoApiResponse<VideoResponse>> {
+    const result = await this.videoService.confirmVideoUpload(videoData);
+    return {
+      code: 200,
+      message: 'success',
+      data: result,
+    };
   }
 }
