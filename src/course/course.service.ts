@@ -1,6 +1,10 @@
-// src/video/video.service.ts
+// src/course/course.service.ts
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { CourseUploadConfirmDto, CourseResponse } from './dto/course.dto';
+import {
+  CourseUploadConfirmDto,
+  CourseResponse,
+  CourseListResponseDto,
+} from './dto/course.dto';
 import { CourseInfo } from './entities/course.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -49,14 +53,34 @@ export class CourseService {
     // 2. 处理课程元数据（时长、格式等）
     // 3. 保存到数据库
     // 4. 生成正式的课程访问地址
-
-    // 模拟实现
     return {
       courseId: result.id.toString(),
       title: result.title,
       description: result.description,
       categoryId: result.categoryId,
       createdAt: result.createdAt,
+    };
+  }
+
+  // 获取课程列表
+  async getCourseList(): Promise<CourseListResponseDto> {
+    // 获取所有课程列表
+    const [courses, total] = await this.courseInfoRepository.findAndCount({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      courses: courses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        categoryId: course.categoryId,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      })),
+      total,
     };
   }
 }

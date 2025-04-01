@@ -1,5 +1,5 @@
 // src/video/video.controller.ts
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -7,6 +7,8 @@ import {
   CourseUploadConfirmDto,
   CourseResponse,
   ApiResponse as CourseApiResponse,
+  CourseListApiResponse,
+  CourseListResponseDto,
 } from './dto/course.dto';
 
 @ApiTags('课程管理')
@@ -37,6 +39,25 @@ export class CourseController {
     @Body() courseData: CourseUploadConfirmDto,
   ): Promise<CourseApiResponse> {
     const result = await this.courseService.confirmCourseUpload(courseData);
+    return {
+      code: 200,
+      message: 'success',
+      data: result,
+    };
+  }
+
+  @Get('list')
+  @ApiOperation({
+    summary: '获取课程列表',
+    description: '获取所有课程的列表信息',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '成功获取课程列表',
+    type: CourseListApiResponse,
+  })
+  async getCourseList(): Promise<CourseListApiResponse> {
+    const result = await this.courseService.getCourseList();
     return {
       code: 200,
       message: 'success',
