@@ -99,4 +99,31 @@ export class CourseService {
       total,
     };
   }
+
+  // 获取课程详情
+  async getCourseDetail(id: number): Promise<CourseDetailDto> {
+    // 1. 通过id获取课程基本信息
+    const courseInfo = await this.courseInfoRepository.findOne({
+      where: { id },
+    });
+
+    if (!courseInfo) {
+      throw new NotFoundException('课程不存在');
+    }
+
+    // 2. 通过fileId获取文件访问URL
+    const fileUrl = await this.uploadService.getSignedUrl(courseInfo.fileId);
+
+    // 3. 返回组装后的课程详情
+    return {
+      id: courseInfo.id,
+      fileId: courseInfo.fileId,
+      title: courseInfo.title,
+      description: courseInfo.description,
+      categoryId: courseInfo.categoryId,
+      createdAt: courseInfo.createdAt,
+      updatedAt: courseInfo.updatedAt,
+      fileUrl,
+    };
+  }
 }
