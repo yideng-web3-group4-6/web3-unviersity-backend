@@ -1,13 +1,21 @@
 // src/course/course.service.ts
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CourseUploadConfirmDto,
   CourseResponse,
   CourseListResponseDto,
+  CourseDetailDto,
+  CourseListQueryDto,
 } from './dto/course.dto';
 import { CourseInfo } from './entities/course.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class CourseService {
@@ -16,6 +24,7 @@ export class CourseService {
   constructor(
     @InjectRepository(CourseInfo)
     private readonly courseInfoRepository: Repository<CourseInfo>,
+    private readonly uploadService: UploadService,
   ) {}
 
   async handleUpload(file: Express.Multer.File, metadata: any): Promise<any> {
@@ -54,7 +63,7 @@ export class CourseService {
     // 3. 保存到数据库
     // 4. 生成正式的课程访问地址
     return {
-      courseId: result.id.toString(),
+      fileId: result.id.toString(),
       title: result.title,
       description: result.description,
       categoryId: result.categoryId,
@@ -63,17 +72,24 @@ export class CourseService {
   }
 
   // 获取课程列表
-  async getCourseList(): Promise<CourseListResponseDto> {
-    // 获取所有课程列表
+  async getCourseList(
+    query: CourseListQueryDto,
+  ): Promise<CourseListResponseDto> {
+    const { page = 1, pageSize = 10 } = query;
+    const skip = (page - 1) * pageSize;
+
     const [courses, total] = await this.courseInfoRepository.findAndCount({
       order: {
         createdAt: 'DESC',
       },
+      skip,
+      take: pageSize,
     });
 
     return {
       courses: courses.map((course) => ({
         id: course.id,
+        fileId: course.fileId,
         title: course.title,
         description: course.description,
         categoryId: course.categoryId,

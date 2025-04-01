@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsOptional, IsInt, Min, Max } from 'class-validator';
 
 export class CourseUploadConfirmDto {
   @ApiProperty({
@@ -33,7 +35,7 @@ export class CourseResponse {
     description: '课程ID',
     example: 'cid-87654321',
   })
-  courseId: string;
+  fileId: string;
 
   @ApiProperty({
     description: '课程标题',
@@ -88,8 +90,14 @@ export class CourseListItemDto {
   id: number;
 
   @ApiProperty({
+    description: '文件ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  fileId: string;
+
+  @ApiProperty({
     description: '课程标题',
-    example: 'web3 class',
+    example: 'web3',
   })
   title: string;
 
@@ -184,4 +192,31 @@ export class CourseDetailApiResponse {
     type: CourseDetailDto,
   })
   data: CourseDetailDto;
+}
+
+export class CourseListQueryDto {
+  @ApiProperty({
+    description: '页码',
+    example: 1,
+    required: false,
+    default: 1,
+  })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiProperty({
+    description: '每页数量',
+    example: 10,
+    required: false,
+    default: 10,
+  })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number = 10;
 }
