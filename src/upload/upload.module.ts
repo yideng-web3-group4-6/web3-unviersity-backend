@@ -6,10 +6,7 @@ import { UploadService } from './upload.service';
 import { FileInfo } from './entities/file-info.entity';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([FileInfo]),
-  ],
+  imports: [ConfigModule.forRoot(), TypeOrmModule.forFeature([FileInfo])],
   controllers: [UploadController],
   providers: [UploadService],
   exports: [UploadService],
