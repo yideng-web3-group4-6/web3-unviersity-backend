@@ -1,12 +1,15 @@
 import {
   Controller,
   Post,
+  Get,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
   MaxFileSizeValidator,
   ParseFilePipe,
   FileTypeValidator,
+  Param,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
@@ -16,6 +19,8 @@ import {
   ApiBody,
   ApiOperation,
   ApiResponse,
+  ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 @ApiTags('文件上传')
@@ -46,9 +51,9 @@ export class UploadController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 5MB
+          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 50MB
           new FileTypeValidator({
-            fileType: /(jpg|jpeg|png|pdf|doc|doc|mp4)$/,
+            fileType: /(jpg|jpeg|png|pdf|doc|docx|mp4)$/,
           }),
         ],
       }),
@@ -56,12 +61,12 @@ export class UploadController {
     file: Express.Multer.File,
   ) {
     try {
-      const fileUrl = await this.uploadService.uploadFile(file);
+      const fileId = await this.uploadService.uploadFile(file);
       return {
         success: true,
         message: '文件上传成功',
         data: {
-          url: fileUrl,
+          fileId,
           filename: file.originalname,
           size: file.size,
           mimetype: file.mimetype,
@@ -69,6 +74,38 @@ export class UploadController {
       };
     } catch (error) {
       throw new BadRequestException('文件上传失败：' + error.message);
+    }
+  }
+
+  @Get(':fileId/url')
+  @ApiOperation({ summary: '获取文件的预签名URL' })
+  @ApiParam({ name: 'fileId', description: '文件ID' })
+  @ApiQuery({
+    name: 'expiresIn',
+    required: false,
+    description: 'URL过期时间（秒），默认3600秒',
+  })
+  @ApiResponse({ status: 200, description: '获取预签名URL成功' })
+  @ApiResponse({ status: 404, description: '文件不存在' })
+  async getSignedUrl(
+    @Param('fileId') fileId: string,
+    @Query('expiresIn') expiresIn?: number,
+  ) {
+    try {
+      const signedUrl = await this.uploadService.getSignedUrl(
+        fileId,
+        expiresIn,
+      );
+      return {
+        success: true,
+        message: '获取预签名URL成功',
+        data: {
+          url: signedUrl,
+          expiresIn: expiresIn || 3600,
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException('获取预签名URL失败：' + error.message);
     }
   }
 }
