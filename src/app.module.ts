@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VideoModule } from './video/video.module';
 import { UserModule } from './user/user.module';
 import { getDatabaseConfig } from './config/database.config';
 import { ArticleModule } from './article/article.module';
 import { getEnvConfig } from './config/env.config';
 import { DatabaseInitService } from './config/database-init.service';
 import { UploadModule } from './upload/upload.module';
+import { CourseModule } from './course/course.module';
 @Module({
   imports: [
     // 加载 .env 文件中的环境变量，并全局生效
@@ -22,7 +22,7 @@ import { UploadModule } from './upload/upload.module';
         return getDatabaseConfig(configService);
       },
     }),
-    VideoModule,
+    CourseModule,
     ArticleModule,
     UserModule,
     UploadModule,
