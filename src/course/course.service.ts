@@ -44,30 +44,25 @@ export class CourseService {
   async confirmCourseUpload(
     courseData: CourseUploadConfirmDto,
   ): Promise<CourseResponse> {
-    // 验证标题长度
-    if (courseData.title.length > 100) {
-      throw new BadRequestException('课程标题不能超过100个字符');
-    }
-
     // 存入数据库
     const courseInfo = new CourseInfo();
     courseInfo.fileId = courseData.fileId;
     courseInfo.title = courseData.title;
     courseInfo.description = courseData.description;
     courseInfo.categoryId = courseData.categoryId;
+
     const result = await this.courseInfoRepository.save(courseInfo);
 
-    // TODO:
-    // 1. 根据 fileId 验证文件是否存在
-    // 2. 处理课程元数据（时长、格式等）
-    // 3. 保存到数据库
-    // 4. 生成正式的课程访问地址
+    // 添加保存后的数据日志
+    this.logger.debug(`Save result: ${JSON.stringify(result)}`);
     return {
-      fileId: result.id.toString(),
+      id: result.id,
+      fileId: result.fileId,
       title: result.title,
       description: result.description,
       categoryId: result.categoryId,
       createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
     };
   }
 
@@ -86,16 +81,26 @@ export class CourseService {
       take: pageSize,
     });
 
+    // 获取每个课程的签名URL
+    const coursesWithUrls = await Promise.all(
+      courses.map(async (course) => {
+        const fileUrl = await this.uploadService.getSignedUrl(course.fileId);
+        console.log('fileUrl', fileUrl);
+        return {
+          id: course.id,
+          fileId: course.fileId,
+          title: course.title,
+          description: course.description,
+          categoryId: course.categoryId,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
+          fileUrl,
+        };
+      }),
+    );
+
     return {
-      courses: courses.map((course) => ({
-        id: course.id,
-        fileId: course.fileId,
-        title: course.title,
-        description: course.description,
-        categoryId: course.categoryId,
-        createdAt: course.createdAt,
-        updatedAt: course.updatedAt,
-      })),
+      courses: coursesWithUrls,
       total,
     };
   }

@@ -11,16 +11,16 @@ export class CourseInfo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
   fileId: string;
 
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   categoryId: number;
 
   @CreateDateColumn()

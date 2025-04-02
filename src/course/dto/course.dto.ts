@@ -1,8 +1,63 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CourseUploadConfirmDto {
+  constructor() {
+    console.log('CourseUploadConfirmDto constructed');
+  }
+
+  @ApiProperty({
+    description: '文件ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsNotEmpty({ message: '文件ID不能为空' })
+  @IsString({ message: '文件ID必须是字符串' })
+  fileId: string;
+
+  @ApiProperty({
+    description: 'title',
+    example: 'title',
+  })
+  @IsNotEmpty({ message: '课程标题不能为空' })
+  @IsString({ message: '课程标题必须是字符串' })
+  @MaxLength(100, { message: '课程标题不能超过100个字符' })
+  title: string;
+
+  @ApiProperty({
+    description: 'description',
+    example: 'description',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: '课程描述必须是字符串' })
+  description?: string;
+
+  @ApiProperty({
+    description: '分类ID',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt({ message: '分类ID必须是整数' })
+  categoryId?: number;
+}
+
+export class CourseResponse {
+  @ApiProperty({
+    description: '课程ID',
+    example: 1,
+  })
+  id: number;
+
   @ApiProperty({
     description: '文件ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -28,38 +83,18 @@ export class CourseUploadConfirmDto {
     required: false,
   })
   categoryId?: number;
-}
-
-export class CourseResponse {
-  @ApiProperty({
-    description: '课程ID',
-    example: 'cid-87654321',
-  })
-  fileId: string;
-
-  @ApiProperty({
-    description: '课程标题',
-    example: '我的第一个课程',
-  })
-  title: string;
-
-  @ApiProperty({
-    description: '课程描述',
-    example: '这是一个示例课程描述',
-  })
-  description: string;
-
-  @ApiProperty({
-    description: '分类ID',
-    example: 1,
-  })
-  categoryId: number;
 
   @ApiProperty({
     description: '创建时间',
-    example: '2025-03-30T10:30:15Z',
+    example: '2024-03-30T10:30:15Z',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: '更新时间',
+    example: '2024-03-30T10:30:15Z',
+  })
+  updatedAt: Date;
 }
 
 export class ApiResponse {
@@ -124,6 +159,12 @@ export class CourseListItemDto {
     example: '2024-03-30T10:30:15Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: '视频URL',
+    example: 'https://example.com/video.mp4',
+  })
+  fileUrl: string;
 }
 
 export class CourseListResponseDto {

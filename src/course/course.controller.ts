@@ -8,8 +8,9 @@ import {
   Query,
   Param,
   ParseIntPipe,
+  Logger,
 } from '@nestjs/common';
-import { CourseService } from './course.service';
+
 import { ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   CourseUploadConfirmDto,
@@ -19,6 +20,7 @@ import {
   CourseListQueryDto,
   CourseDetailApiResponse,
 } from './dto/course.dto';
+import { CourseService } from './course.service';
 
 @ApiTags('课程管理')
 @Controller('course')
