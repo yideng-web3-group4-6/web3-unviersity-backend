@@ -5,6 +5,10 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   CourseUploadConfirmDto,
   CourseResponse,
@@ -13,19 +17,36 @@ import {
   CourseListQueryDto,
 } from './dto/course.dto';
 import { CourseInfo } from './entities/course.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UploadService } from '../upload/upload.service';
-
+import { FileInfo } from './entities/file-info.entity';
 @Injectable()
 export class CourseService {
   private readonly logger = new Logger(CourseService.name);
+  private s3Client: S3Client;
+  private readonly bucketName: string;
+  private readonly region: string;
 
   constructor(
     @InjectRepository(CourseInfo)
     private readonly courseInfoRepository: Repository<CourseInfo>,
-    private readonly uploadService: UploadService,
-  ) {}
+    @InjectRepository(FileInfo)
+    private readonly fileInfoRepository: Repository<FileInfo>,
+  ) {
+    // 初始化 S3 客户端
+    this.region = process.env.AWS_REGION || 'ap-northeast-1';
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+    this.bucketName = process.env.AWS_S3_BUCKET_NAME;
+
+    this.s3Client = new S3Client({
+      region: this.region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+      signingRegion: this.region,
+      forcePathStyle: true,
+    });
+  }
 
   async handleUpload(file: Express.Multer.File, metadata: any): Promise<any> {
     this.logger.log(
@@ -84,17 +105,16 @@ export class CourseService {
     // 获取每个课程的签名URL
     const coursesWithUrls = await Promise.all(
       courses.map(async (course) => {
-        const fileUrl = await this.uploadService.getSignedUrl(course.fileId);
-        console.log('fileUrl', fileUrl);
+        const fileUrl = await this.getSignedUrl(course.fileId);
         return {
           id: course.id,
+          fileUrl,
           fileId: course.fileId,
           title: course.title,
           description: course.description,
           categoryId: course.categoryId,
-          createdAt: course.createdAt,
           updatedAt: course.updatedAt,
-          fileUrl,
+          createdAt: course.createdAt,
         };
       }),
     );
@@ -117,7 +137,7 @@ export class CourseService {
     }
 
     // 2. 通过fileId获取文件访问URL
-    const fileUrl = await this.uploadService.getSignedUrl(courseInfo.fileId);
+    const fileUrl = await this.getSignedUrl(courseInfo.fileId);
 
     // 3. 返回组装后的课程详情
     return {
@@ -130,5 +150,34 @@ export class CourseService {
       updatedAt: courseInfo.updatedAt,
       fileUrl,
     };
+  }
+
+  // 获取文件签名URL
+  private async getSignedUrl(
+    fileId: string,
+    expiresIn = 3600,
+  ): Promise<string> {
+    const fileInfo = await this.fileInfoRepository.findOne({
+      where: { fileId },
+    });
+
+    if (!fileInfo) {
+      throw new Error('文件不存在');
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: fileInfo.bucket,
+      Key: fileInfo.key,
+    });
+
+    try {
+      const signedUrl = await getSignedUrl(this.s3Client, command, {
+        expiresIn,
+      });
+      return signedUrl;
+    } catch (error) {
+      this.logger.error(`Failed to generate signed URL: ${error.message}`);
+      throw new Error('生成预签名URL失败');
+    }
   }
 }

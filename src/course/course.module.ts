@@ -4,10 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CourseController } from './course.controller';
 import { CourseService } from './course.service';
 import { CourseInfo } from './entities/course.entity';
-import { UploadModule } from '../upload/upload.module';
+import { FileInfo } from './entities/file-info.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CourseInfo]), UploadModule],
+  imports: [TypeOrmModule.forFeature([CourseInfo, FileInfo])],
   controllers: [CourseController],
   providers: [CourseService],
 })
