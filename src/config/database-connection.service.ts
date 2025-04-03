@@ -19,33 +19,6 @@ export class DatabaseConnectionService {
       port,
       user: username,
     };
-    if (nodeEnv === 'production') {
-      const region = this.configService.get('AWS_REGION', 'us-west-2');
-      const accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
-      const secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
-
-      const signer = new Signer({
-        region,
-        hostname: host,
-        port,
-        username,
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-      });
-
-      const token = await signer.getAuthToken();
-
-      return {
-        ...baseConfig,
-        password: token,
-        ssl: {
-          rejectUnauthorized: true,
-        },
-      };
-    }
-
     return {
       ...baseConfig,
       password: this.configService.get('DB_PASSWORD', 'password'),

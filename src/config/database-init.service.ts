@@ -13,6 +13,11 @@ export class DatabaseInitService {
   }
 
   async initDatabase() {
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.log('生产环境不进行数据库初始化');
+      return;
+    }
+
     const database = this.configService.get('DB_NAME', 'web3_university_dev');
     const nodeEnv = this.configService.get('NODE_ENV', 'development');
 
