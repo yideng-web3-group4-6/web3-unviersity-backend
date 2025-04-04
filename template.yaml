@@ -4,33 +4,55 @@ Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Timeout: 30
-    MemorySize: 256
+    MemorySize: 1024
     Runtime: nodejs18.x
+    Architectures: ['x86_64']
     Environment:
       Variables:
         NODE_ENV: production
+        NODE_OPTIONS: '--enable-source-maps'
+    EphemeralStorage:
+      Size: 512
   Api:
+    OpenApiVersion: '2.0'
     Auth:
       ApiKeyRequired: true
     Cors:
       AllowMethods: "'*'"
-      AllowHeaders: "'*'"
+      AllowHeaders: "'Content-Type,X-Api-Key,Authorization'"
       AllowOrigin: "'*'"
+      MaxAge: 600
 
 Resources:
+  NodeModulesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: web3-university-dependencies
+      Description: Node modules for Web3 University Nest.js application
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - nodejs18.x
+      RetentionPolicy: Retain
+
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      BinaryMediaTypes:
+        - 'image/*'
+        - 'multipart/form-data'
+
   NestFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      SkipBuild: true
     Properties:
-      Handler: dist/lambda.handler
-      CodeUri: ./
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /{proxy+}
-            Method: ANY
-            Auth:
-              ApiKeyRequired: true
+      Handler: lambda.handler
+      CodeUri: ./dist
+      MemorySize: 3008
+      Timeout: 30
+      Layers:
+        - !Ref NodeModulesLayer
       Policies:
         - Statement:
             - Effect: Allow
@@ -41,6 +63,14 @@ Resources:
               Action:
                 - rds:*
               Resource: '*'
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref Api
+      AutoPublishAlias: live
 
   ApiKey:
     Type: AWS::ApiGateway::ApiKey
@@ -52,7 +82,7 @@ Resources:
     Type: AWS::ApiGateway::UsagePlan
     Properties:
       ApiStages:
-        - ApiId: !Ref ServerlessRestApi
+        - ApiId: !Ref Api
           Stage: prod
       Description: Usage plan for Web3 University API
       UsagePlanName: Web3UniversityUsagePlan
@@ -67,8 +97,8 @@ Resources:
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
-  NestFunction:
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  FunctionArn:
     Description: Lambda Function ARN
     Value: !GetAtt NestFunction.Arn
   ApiKeyId:

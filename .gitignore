@@ -19,6 +19,7 @@ uploads
 /coverage
 /.nyc_output
 .aws-sam
+.layer/*
 # IDEs and editors
 /.idea
 .project
