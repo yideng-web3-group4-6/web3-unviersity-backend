@@ -49,15 +49,15 @@ Resources:
       CompatibleRuntimes:
         - nodejs20.x
       RetentionPolicy: Retain
-  # AwsLayer:
-  #   Type: AWS::Serverless::LayerVersion
-  #   Properties:
-  #     LayerName: nest-aws-layer
-  #     Description: AWS dependencies for Nest.js application
-  #     ContentUri: layer/aws
-  #     CompatibleRuntimes:
-  #       - nodejs20.x
-  #     RetentionPolicy: Retain
+  AwsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nest-aws-layer
+      Description: AWS dependencies for Nest.js application
+      ContentUri: layer/aws
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Retain
   UtilsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -91,7 +91,7 @@ Resources:
         - !Ref CoreLayer
         - !Ref DatabaseLayer
         - !Ref AuthLayer
-        # - !Ref AwsLayer
+        - !Ref AwsLayer
         - !Ref UtilsLayer
       Policies:
         - S3CrudPolicy:

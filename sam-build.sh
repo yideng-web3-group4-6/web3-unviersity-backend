@@ -58,18 +58,18 @@ cat > layer/database/nodejs/package.json << EOF
 EOF
 
 # AWS Layer
-# echo "📦 Setting up AWS layer..."
-# cat > layer/aws/nodejs/package.json << EOF
-# {
-#   "dependencies": {
-#     "@aws-sdk/client-rds": "^3.777.0",
-#     "@aws-sdk/client-s3": "^3.777.0",
-#     "@aws-sdk/lib-storage": "^3.777.0",
-#     "@aws-sdk/rds-signer": "^3.778.0",
-#     "@aws-sdk/s3-request-presigner": "^3.779.0"
-#   }
-# }
-# EOF
+echo "📦 Setting up AWS layer..."
+cat > layer/aws/nodejs/package.json << EOF
+{
+  "dependencies": {
+    "@aws-sdk/client-rds": "^3.777.0",
+    "@aws-sdk/client-s3": "^3.777.0",
+    "@aws-sdk/lib-storage": "^3.777.0",
+    "@aws-sdk/rds-signer": "^3.778.0",
+    "@aws-sdk/s3-request-presigner": "^3.779.0"
+  }
+}
+EOF
 
 # Auth Layer
 echo "📦 Setting up Auth layer..."
@@ -99,7 +99,7 @@ EOF
 
 # 在每个 layer 中安装依赖
 echo "📦 Installing dependencies for all layers..."
-for layer in core database auth utils; do
+for layer in core database aws auth utils; do
     echo "📦 Installing dependencies for $layer layer..."
     cd layer/$layer/nodejs
     pnpm install --prod
