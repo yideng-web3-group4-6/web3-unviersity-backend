@@ -5,44 +5,80 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 1024
-    Runtime: nodejs18.x
+    Runtime: nodejs20.x
     Architectures: ['x86_64']
     Environment:
       Variables:
-        NODE_ENV: production
         NODE_OPTIONS: '--enable-source-maps'
     EphemeralStorage:
       Size: 512
   Api:
     OpenApiVersion: '2.0'
-    Auth:
-      ApiKeyRequired: true
     Cors:
       AllowMethods: "'*'"
-      AllowHeaders: "'Content-Type,X-Api-Key,Authorization'"
+      AllowHeaders: "'Content-Type,Authorization'"
       AllowOrigin: "'*'"
       MaxAge: 600
 
 Resources:
-  NodeModulesLayer:
+  CoreLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: web3-university-dependencies
-      Description: Node modules for Web3 University Nest.js application
-      ContentUri: layer/
+      LayerName: nest-core-layer
+      Description: Core dependencies for Nest.js application
+      ContentUri: layer/core
       CompatibleRuntimes:
-        - nodejs18.x
+        - nodejs20.x
+      RetentionPolicy: Retain
+  DatabaseLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nest-database-layer
+      Description: Database dependencies for Nest.js application
+      ContentUri: layer/database
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Retain
+
+  AuthLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nest-auth-layer
+      Description: Auth dependencies for Nest.js application
+      ContentUri: layer/auth
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Retain
+  # AwsLayer:
+  #   Type: AWS::Serverless::LayerVersion
+  #   Properties:
+  #     LayerName: nest-aws-layer
+  #     Description: AWS dependencies for Nest.js application
+  #     ContentUri: layer/aws
+  #     CompatibleRuntimes:
+  #       - nodejs20.x
+  #     RetentionPolicy: Retain
+  UtilsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nest-utils-layer
+      Description: Utility dependencies for Nest.js application
+      ContentUri: layer/utils
+      CompatibleRuntimes:
+        - nodejs20.x
       RetentionPolicy: Retain
 
   Api:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: prod
+      StageName: dev
       BinaryMediaTypes:
         - 'image/*'
         - 'multipart/form-data'
+      Auth:
+        DefaultAuthorizer: NONE
 
-  NestFunction:
+  NestjsFunction:
     Type: AWS::Serverless::Function
     Metadata:
       SkipBuild: true
@@ -52,17 +88,15 @@ Resources:
       MemorySize: 3008
       Timeout: 30
       Layers:
-        - !Ref NodeModulesLayer
+        - !Ref CoreLayer
+        - !Ref DatabaseLayer
+        - !Ref AuthLayer
+        # - !Ref AwsLayer
+        - !Ref UtilsLayer
       Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - s3:*
-              Resource: '*'
-            - Effect: Allow
-              Action:
-                - rds:*
-              Resource: '*'
+        - S3CrudPolicy:
+            BucketName: aladdinagi-assets
+        - VPCAccessPolicy: {}
       Events:
         ApiEvent:
           Type: Api
@@ -70,37 +104,14 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref Api
+            Auth:
+              Authorizer: NONE
       AutoPublishAlias: live
-
-  ApiKey:
-    Type: AWS::ApiGateway::ApiKey
-    Properties:
-      Enabled: true
-      Name: Web3UniversityApiKey
-
-  UsagePlan:
-    Type: AWS::ApiGateway::UsagePlan
-    Properties:
-      ApiStages:
-        - ApiId: !Ref Api
-          Stage: prod
-      Description: Usage plan for Web3 University API
-      UsagePlanName: Web3UniversityUsagePlan
-
-  UsagePlanKey:
-    Type: AWS::ApiGateway::UsagePlanKey
-    Properties:
-      KeyId: !Ref ApiKey
-      KeyType: API_KEY
-      UsagePlanId: !Ref UsagePlan
 
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
-    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev'
   FunctionArn:
     Description: Lambda Function ARN
-    Value: !GetAtt NestFunction.Arn
-  ApiKeyId:
-    Description: API Key ID
-    Value: !Ref ApiKey
+    Value: !GetAtt NestjsFunction.Arn

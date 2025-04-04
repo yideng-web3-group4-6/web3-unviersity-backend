@@ -22,7 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "sam:build": "./sam-build.sh",
     "sam:local": "sam local start-api",
-    "sam:deploy": "./sam-build.sh && sam deploy --guided",
+    "sam:deploy": "./sam-build.sh production",
     "sam:pub": "sam deploy --guided"
   },
   "dependencies": {
