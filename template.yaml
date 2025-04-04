@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs18.x
+    Environment:
+      Variables:
+        NODE_ENV: production
+  Api:
+    Auth:
+      ApiKeyRequired: true
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
+
+Resources:
+  NestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/lambda.handler
+      CodeUri: ./
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            Auth:
+              ApiKeyRequired: true
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - rds:*
+              Resource: '*'
+
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Enabled: true
+      Name: Web3UniversityApiKey
+
+  UsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref ServerlessRestApi
+          Stage: prod
+      Description: Usage plan for Web3 University API
+      UsagePlanName: Web3UniversityUsagePlan
+
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
+  NestFunction:
+    Description: Lambda Function ARN
+    Value: !GetAtt NestFunction.Arn
+  ApiKeyId:
+    Description: API Key ID
+    Value: !Ref ApiKey

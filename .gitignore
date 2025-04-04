@@ -18,7 +18,7 @@ uploads
 # Tests
 /coverage
 /.nyc_output
-
+.aws-sam
 # IDEs and editors
 /.idea
 .project
