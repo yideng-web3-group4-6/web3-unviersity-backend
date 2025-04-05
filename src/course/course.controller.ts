@@ -1,14 +1,5 @@
 // src/video/video.controller.ts
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Get,
-  Query,
-  Param,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
@@ -91,7 +82,7 @@ export class CourseController {
     description: '课程不存在',
   })
   async getCourseDetail(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
   ): Promise<CourseDetailApiResponse> {
     const result = await this.courseService.getCourseDetail(id);
     return {

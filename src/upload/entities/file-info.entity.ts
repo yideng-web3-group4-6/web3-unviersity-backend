@@ -8,11 +8,14 @@ import {
 
 @Entity('fileInfo')
 export class FileInfo {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ unique: true })
-  fileId: string;
+  @Column({ nullable: true })
+  courseId: string;
+
+  @Column({ nullable: true })
+  title: string;
 
   @Column()
   originalName: string;

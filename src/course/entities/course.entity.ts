@@ -8,20 +8,29 @@ import {
 
 @Entity('courseInfo')
 export class CourseInfo {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  fileId: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @Column()
-  categoryId: number;
+  duration: number;
+
+  @Column()
+  price: number;
+
+  @Column({ nullable: true })
+  tags: string;
+
+  @Column()
+  level: string;
+
+  @Column()
+  icon: string;
 
   @CreateDateColumn()
   createdAt: Date;

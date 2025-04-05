@@ -1,60 +1,81 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+} from 'class-validator';
 
 export class CourseUploadConfirmDto {
   @ApiProperty({
-    description: '文件ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  fileId: string;
-
-  @ApiProperty({
     description: '课程标题',
     example: '我的第一个课程',
   })
+  @IsString()
+  @IsNotEmpty()
   title: string;
 
   @ApiProperty({
     description: '课程描述',
     example: '这是一个示例课程描述',
-    required: false,
   })
+  @IsString()
   description?: string;
 
   @ApiProperty({
-    description: '分类ID',
+    description: '课程几周期',
     example: 1,
-    required: false,
   })
-  categoryId?: number;
+  @IsNumber()
+  duration: number;
+
+  @ApiProperty({
+    description: '课程价格',
+    example: 100,
+  })
+  @IsNumber()
+  price: number;
+
+  @ApiProperty({
+    description: '课程标签',
+    example: 'Solidity,Remix,Hardhat',
+  })
+  @IsString()
+  tags?: string;
+
+  @ApiProperty({
+    description: '课程难度',
+    enum: ['Beginner', 'Intermediate', 'Advanced'],
+    example: 'Beginner',
+  })
+  @IsString()
+  @IsNotEmpty()
+  level: string;
+
+  @ApiProperty({
+    description: '课程图标',
+    enum: [
+      'BookOpen',
+      'Code',
+      'Layers',
+      'Shield',
+      'Database',
+      'Zap',
+      'Cpu',
+      'Workflow',
+    ],
+    example: 'BookOpen',
+  })
+  @IsString()
+  @IsNotEmpty()
+  icon: string;
 }
 
-export class CourseResponse {
-  @ApiProperty({
-    description: '课程ID',
-    example: 'cid-87654321',
-  })
-  fileId: string;
-
-  @ApiProperty({
-    description: '课程标题',
-    example: '我的第一个课程',
-  })
-  title: string;
-
-  @ApiProperty({
-    description: '课程描述',
-    example: '这是一个示例课程描述',
-  })
-  description: string;
-
-  @ApiProperty({
-    description: '分类ID',
-    example: 1,
-  })
-  categoryId: number;
-
+export class CourseResponse extends CourseUploadConfirmDto {
   @ApiProperty({
     description: '创建时间',
     example: '2025-03-30T10:30:15Z',
@@ -82,56 +103,12 @@ export class ApiResponse {
   data: CourseResponse;
 }
 
-export class CourseListItemDto {
-  @ApiProperty({
-    description: '课程ID',
-    example: 1,
-  })
-  id: number;
-
-  @ApiProperty({
-    description: '文件ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  fileId: string;
-
-  @ApiProperty({
-    description: '课程标题',
-    example: 'web3',
-  })
-  title: string;
-
-  @ApiProperty({
-    description: '课程描述',
-    example: 'how to learn web3',
-  })
-  description: string;
-
-  @ApiProperty({
-    description: '分类ID',
-    example: 1,
-  })
-  categoryId: number;
-
-  @ApiProperty({
-    description: '创建时间',
-    example: '2024-03-30T10:30:15Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '更新时间',
-    example: '2024-03-30T10:30:15Z',
-  })
-  updatedAt: Date;
-}
-
 export class CourseListResponseDto {
   @ApiProperty({
     description: '课程列表',
-    type: [CourseListItemDto],
+    type: [CourseResponse],
   })
-  courses: CourseListItemDto[];
+  courses: CourseResponse[];
 
   @ApiProperty({
     description: '总数',
@@ -140,18 +117,23 @@ export class CourseListResponseDto {
   total: number;
 }
 
-export class CourseDetailDto extends CourseListItemDto {
+export class CourseDetailDto extends CourseResponse {
   @ApiProperty({
-    description: '文件ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: '文件集合',
   })
-  fileId: string;
+  children?: CourseChildrenResponse[];
 
   @ApiProperty({
-    description: '视频URL',
-    example: 'https://example.com/video.mp4',
+    description: '封面url',
   })
-  fileUrl: string;
+  @IsString()
+  coverImage?: string;
+
+  @ApiProperty({
+    description: '更新时间',
+    example: '2024-03-30T10:30:15Z',
+  })
+  updatedAt: Date;
 }
 
 export class CourseListApiResponse {
@@ -273,4 +255,44 @@ export class CourseDetailByFileIdApiResponse {
     type: CourseDetailByFileIdResponseDto,
   })
   data: CourseDetailByFileIdResponseDto;
+}
+
+export class CourseChildrenResponse {
+  @ApiProperty({
+    description: '文件ID',
+  })
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  @ApiProperty({
+    description: '文件url',
+  })
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @ApiProperty({
+    description: '文件标题',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    description: '创建时间',
+  })
+  createdAt: Date;
+}
+
+export class CourseFileResponse {
+  @ApiProperty({
+    description: '课程集合',
+  })
+  fileData: CourseChildrenResponse[];
+
+  @ApiProperty({
+    description: '封面url',
+  })
+  @IsString()
+  coursesImage?: string;
 }

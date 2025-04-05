@@ -10,6 +10,7 @@ import {
   FileTypeValidator,
   Param,
   Query,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
@@ -28,8 +29,9 @@ import {
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post()
-  @ApiOperation({ summary: '上传文件到 AWS S3' })
+  @Post('course/:id')
+  @ApiOperation({ summary: '上传课程文件到 AWS S3' })
+  @ApiParam({ name: 'id', description: '课程ID' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -39,7 +41,11 @@ export class UploadController {
           type: 'string',
           format: 'binary',
           description:
-            '要上传的文件（支持格式：jpg, jpeg, png, pdf, doc, docx）',
+            '要上传的文件（支持格式：jpg, jpeg, png, pdf, doc, docx, mp4）',
+        },
+        title: {
+          type: 'string',
+          description: '课程标题',
         },
       },
     },
@@ -48,6 +54,8 @@ export class UploadController {
   @ApiResponse({ status: 400, description: '无效的文件格式或大小' })
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
+    @Param('id') id: string,
+    @Body('title') title: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -61,15 +69,12 @@ export class UploadController {
     file: Express.Multer.File,
   ) {
     try {
-      const fileId = await this.uploadService.uploadFile(file);
+      const fileInfo = await this.uploadService.uploadFile(id, title, file);
       return {
         success: true,
         message: '文件上传成功',
         data: {
-          fileId,
-          filename: file.originalname,
-          size: file.size,
-          mimetype: file.mimetype,
+          fileInfo,
         },
       };
     } catch (error) {
@@ -77,9 +82,9 @@ export class UploadController {
     }
   }
 
-  @Get(':fileId')
-  @ApiOperation({ summary: '获取文件的预签名URL' })
-  @ApiParam({ name: 'fileId', description: '文件ID' })
+  @Get(':id')
+  @ApiOperation({ summary: '获取单个文件的预签名URL' })
+  @ApiParam({ name: 'id', description: '文件ID' })
   @ApiQuery({
     name: 'expiresIn',
     required: false,
@@ -88,12 +93,12 @@ export class UploadController {
   @ApiResponse({ status: 200, description: '获取预签名URL成功' })
   @ApiResponse({ status: 404, description: '文件不存在' })
   async getSignedUrl(
-    @Param('fileId') fileId: string,
+    @Param('id') id: string,
     @Query('expiresIn') expiresIn?: number,
   ) {
     try {
-      const signedUrl = await this.uploadService.getSignedUrl(
-        fileId,
+      const signedUrl = await this.uploadService.getSingleSignedUrl(
+        id,
         expiresIn,
       );
       return {
