@@ -32,6 +32,11 @@ export class UploadController {
   @Post('course/:id')
   @ApiOperation({ summary: '上传课程文件到 AWS S3' })
   @ApiParam({ name: 'id', description: '课程ID' })
+  @ApiQuery({
+    name: 'title',
+    required: false,
+    description: '课程标题',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -43,10 +48,6 @@ export class UploadController {
           description:
             '要上传的文件（支持格式：jpg, jpeg, png, pdf, doc, docx, mp4）',
         },
-        title: {
-          type: 'string',
-          description: '课程标题',
-        },
       },
     },
   })
@@ -55,7 +56,6 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @Param('id') id: string,
-    @Body('title') title: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -67,9 +67,10 @@ export class UploadController {
       }),
     )
     file: Express.Multer.File,
+    @Query('title') title?: string,
   ) {
     try {
-      const fileInfo = await this.uploadService.uploadFile(id, title, file);
+      const fileInfo = await this.uploadService.uploadFile(id, file, title);
       return {
         success: true,
         message: '文件上传成功',

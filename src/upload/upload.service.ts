@@ -50,8 +50,8 @@ export class UploadService {
 
   async uploadFile(
     courseId: string,
-    title: string,
     file: Express.Multer.File,
+    title: string,
   ): Promise<FileInfo> {
     const courseInfo = await this.courseInfoRepository.findOne({
       where: { id: courseId },
