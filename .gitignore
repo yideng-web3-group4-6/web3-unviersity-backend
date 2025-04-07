@@ -11,6 +11,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 uploads
+/.nx/*
 # OS
 .DS_Store
 .env
@@ -19,8 +20,11 @@ uploads
 # Tests
 /coverage
 /.nyc_output
-
+/layer/*
+/dist/*
+.aws-sam/*
 # IDEs and editors
+/.nx/*
 /.idea
 .project
 .classpath
