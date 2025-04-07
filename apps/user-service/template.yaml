@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM template for user-service
+
+Globals:
+  Function:
+    Timeout: 15
+    Runtime: nodejs18.x
+    Architectures: [arm64]
+
+Resources:
+  UserServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: user-service
+      Handler: main.handler
+      CodeUri: ../../dist-lambda/apps/user-service/
+      MemorySize: 256
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            Path: /user/{proxy+}
+            Method: ANY
+      Environment:
+        Variables:
+          NODE_ENV: production

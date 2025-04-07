@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM template for apps/api-gateway
+
+Globals:
+  Function:
+    Timeout: 15
+    Runtime: nodejs18.x
+    Architectures: [arm64]
+
+Resources:
+  UserServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: apps/api-gateway
+      Handler: main.handler
+      CodeUri: ../../dist-lambda/apps/apps/api-gateway/
+      MemorySize: 256
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            Path: /api/{proxy+}
+            Method: ANY
+      Environment:
+        Variables:
+          NODE_ENV: production

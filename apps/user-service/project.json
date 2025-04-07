@@ -1,0 +1,47 @@
+{
+  "name": "user-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/user-service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "target": "es2017",
+        "format": ["cjs"],
+        "main": "apps/user-service/src/main.grpc.ts",
+        "outputPath": "dist/apps/user-service",
+        "tsConfig": "apps/user-service/tsconfig.app.json",
+        "assets": []
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "user-service:build"
+      }
+    },
+    "build:lambda": {
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "target": "es2017",
+        "format": ["cjs"],
+        "main": "apps/user-service/src/main.ts",
+        "outputPath": "dist-lambda/apps/user-service",
+        "tsConfig": "apps/user-service/tsconfig.app.json",
+        "assets": []
+      }
+    }
+  },
+  "esbuildOptions": {
+    "plugins": ["@esbuild-plugins/node-modules-polyfill"]
+  },
+  "tags": [],
+  "deploy": {
+    "executor": "nx:run-commands",
+    "options": {
+      "cwd": "apps/user-service",
+      "command": "sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset"
+    }
+  }
+}

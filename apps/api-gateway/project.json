@@ -1,0 +1,47 @@
+{
+  "name": "api-gateway",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/api-gateway/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "target": "es2017",
+        "format": ["cjs"],
+        "main": "apps/api-gateway/src/main.grpc.ts",
+        "outputPath": "dist/apps/api-gateway",
+        "tsConfig": "apps/api-gateway/tsconfig.app.json",
+        "assets": []
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "api-gateway:build"
+      }
+    },
+    "build:lambda": {
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "target": "es2017",
+        "format": ["cjs"],
+        "main": "apps/api-gateway/src/main.ts",
+        "outputPath": "dist-lambda/apps/api-gateway",
+        "tsConfig": "apps/api-gateway/tsconfig.app.json",
+        "assets": []
+      }
+    }
+  },
+  "esbuildOptions": {
+    "plugins": ["@esbuild-plugins/node-modules-polyfill"]
+  },
+  "tags": [],
+  "deploy": {
+    "executor": "nx:run-commands",
+    "options": {
+      "cwd": "apps/api-gateway",
+      "command": "sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset"
+    }
+  }
+}
