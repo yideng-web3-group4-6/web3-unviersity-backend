@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  UploadServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.handler
+      Runtime: nodejs18.x
+      CodeUri: dist/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          NODE_ENV: production
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /upload/{proxy+}
+            Method: ANY
