@@ -36,7 +36,6 @@ export class ArticleService {
         where: { walletAddress },
       });
 
-      console.log('author', author);
       if (author) {
         article.author = author;
       }
@@ -84,6 +83,8 @@ export class ArticleService {
       title,
       status,
       authorId,
+      likedUserId,
+      favoritedUserId,
       page = 1,
       pageSize = 10,
     } = searchArticleDto;
@@ -94,18 +95,51 @@ export class ArticleService {
       .leftJoinAndSelect('article.likedBy', 'likedBy')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy');
 
+    // 模糊：文章标题
     if (title) {
       queryBuilder.andWhere('article.title LIKE :title', {
         title: `%${title}%`,
       });
     }
 
+    // 文章状态
     if (status) {
       queryBuilder.andWhere('article.status = :status', { status });
     }
 
+    // 作者
     if (authorId) {
       queryBuilder.andWhere('author.id = :authorId', { authorId });
+    }
+
+    // 多对多关系：用户点赞文章
+    if (likedUserId) {
+      queryBuilder
+        .andWhere((qb) => {
+          const subQuery = qb
+            .subQuery()
+            .select('article_likes.article_id')
+            .from('article_likes', 'article_likes')
+            .where('article_likes.user_id = :likedUserId')
+            .getQuery();
+          return 'article.id IN ' + subQuery;
+        })
+        .setParameter('likedUserId', likedUserId);
+    }
+
+    // 多对多关系：用户收藏文章
+    if (favoritedUserId) {
+      queryBuilder
+        .andWhere((qb) => {
+          const subQuery = qb
+            .subQuery()
+            .select('article_favorites.article_id')
+            .from('article_favorites', 'article_favorites')
+            .where('article_favorites.user_id = :favoritedUserId')
+            .getQuery();
+          return 'article.id IN ' + subQuery;
+        })
+        .setParameter('favoritedUserId', favoritedUserId);
     }
 
     // 计算总数
@@ -134,7 +168,11 @@ export class ArticleService {
    */
   async likeArticle(articleId: number, userId: number): Promise<Article> {
     const article = await this.getArticleById(articleId);
-    article.likedBy.push({ id: userId } as any);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    article.likedBy = [...article.likedBy, user];
     return await this.articleRepository.save(article);
   }
 
@@ -159,7 +197,12 @@ export class ArticleService {
    */
   async favoriteArticle(articleId: number, userId: number): Promise<Article> {
     const article = await this.getArticleById(articleId);
-    article.favoritedBy.push({ id: userId } as any);
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    article.favoritedBy = [...article.favoritedBy, user];
     return await this.articleRepository.save(article);
   }
   /**

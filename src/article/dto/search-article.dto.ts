@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
 
 export enum ArticleStatus {
   DRAFT = 'draft',
@@ -41,7 +35,7 @@ export class SearchArticleDto extends PageConditions {
     example: 'Introduction to NestJS',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   title: string;
 
   @ApiProperty({
@@ -88,6 +82,24 @@ export class SearchArticleDto extends PageConditions {
   })
   @IsOptional()
   authorId?: number;
+
+  @ApiProperty({
+    description:
+      'User ID who liked(optional), this will search for articles liked by the user',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  likedUserId?: number;
+
+  @ApiProperty({
+    description:
+      'User ID who favorited(optional), this will search for articles favorited by the user',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  favoritedUserId?: number;
 
   // TODO: 按照时间段查询
 }

@@ -40,8 +40,27 @@ export class ArticleController {
   @ApiResponse({ status: 201, description: 'Article created successfully' })
   async createArticle(@Body() dto: CreateArticleDto, @Req() req) {
     const user = req.user;
-    console.log('user????', user);
     return await this.articleService.createArticle(dto, user.walletAddress);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Get articles by conditions' })
+  @ApiBody({
+    type: SearchArticleDto,
+    description: '搜索条件',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Articles retrieved successfully',
+    type: ArticleListReturnDto,
+  })
+  async getArticlesByConditions(
+    @Body() searchArticleDto: SearchArticleDto,
+  ): Promise<ArticleListReturnDto> {
+    return await this.articleService.searchArticlesByConditions(
+      searchArticleDto,
+    );
   }
 
   @Get(':id')
@@ -109,28 +128,8 @@ export class ArticleController {
     return { message: `Article ${id} deleted successfully` };
   }
 
-  @Get('search')
-  @ApiOperation({ summary: 'Get articles by conditions' })
-  @ApiBody({
-    type: SearchArticleDto,
-    description: '搜索条件',
-  })
-  @ApiBearerAuth()
-  @ApiResponse({
-    status: 200,
-    description: 'Articles retrieved successfully',
-    type: ArticleListReturnDto,
-  })
-  async getArticlesByConditions(
-    @Body() searchArticleDto: SearchArticleDto,
-  ): Promise<ArticleListReturnDto> {
-    return await this.articleService.searchArticlesByConditions(
-      searchArticleDto,
-    );
-  }
-
   @Get('like/:id')
-  @ApiOperation({ summary: 'Get liked articles' })
+  @ApiOperation({ summary: 'liked articles' })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
   async likeArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
@@ -144,7 +143,7 @@ export class ArticleController {
   }
 
   @Get('unlike/:id')
-  @ApiOperation({ summary: 'Get unliked articles' })
+  @ApiOperation({ summary: 'unliked articles' })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
   async unlikedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
@@ -158,7 +157,7 @@ export class ArticleController {
   }
 
   @Get('favorite/:id')
-  @ApiOperation({ summary: 'Get favorited articles' })
+  @ApiOperation({ summary: 'favorited articles' })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
   async favoritedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
@@ -172,7 +171,7 @@ export class ArticleController {
   }
 
   @Get('unfavorite/:id')
-  @ApiOperation({ summary: 'Get unfavorited articles' })
+  @ApiOperation({ summary: 'unfavorited articles' })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
   async unfavoritedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
