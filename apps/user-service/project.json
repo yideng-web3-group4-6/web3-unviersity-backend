@@ -29,19 +29,27 @@
         "main": "apps/user-service/src/main.ts",
         "outputPath": "dist-lambda/apps/user-service",
         "tsConfig": "apps/user-service/tsconfig.app.json",
-        "assets": []
+        "assets": [],
+        "external": [
+          "@grpc/grpc-js",
+          "@grpc/proto-loader",
+          "@nestjs/platform-socket.io",
+          "cache-manager",
+          "class-transformer/storage"
+        ]
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx build:lambda user-service",
+          "sam build --template-file apps/user-service/template.yaml && sam deploy --template-file apps/user-service/template.yaml --no-confirm-changeset --no-fail-on-empty-changeset"
+        ],
+        "parallel": false
       }
     }
   },
-  "esbuildOptions": {
-    "plugins": ["@esbuild-plugins/node-modules-polyfill"]
-  },
-  "tags": [],
-  "deploy": {
-    "executor": "nx:run-commands",
-    "options": {
-      "cwd": "apps/user-service",
-      "command": "sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset"
-    }
-  }
+
+  "tags": []
 }

@@ -15,8 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@libs/*": ["libs/*"]
+      "@libs/*": ["libs/*"],
+      "@contracts/*": ["libs/contracts/*"],
+      "@shared/*": ["libs/shared/*"],
+      "@utils/*": ["libs/utils/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
-} 
+}

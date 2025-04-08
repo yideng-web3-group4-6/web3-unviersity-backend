@@ -80,12 +80,5 @@
   "esbuildOptions": {
     "plugins": ["@esbuild-plugins/node-modules-polyfill"]
   },
-  "tags": [],
-  "deploy": {
-    "executor": "nx:run-commands",
-    "options": {
-      "cwd": "apps/upload-service",
-      "command": "sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset"
-    }
-  }
+  "tags": []
 }

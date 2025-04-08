@@ -17,6 +17,12 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@libs/*": ["libs/*"],
+      "@contracts/*": ["libs/contracts/*"],
+      "@shared/*": ["libs/shared/*"],
+      "@utils/*": ["libs/utils/*"]
+    }
   }
 }
