@@ -24,6 +24,7 @@ uploads
 /dist/*
 .aws-sam/*
 # IDEs and editors
+/dist-lambda/*
 /.nx/*
 /.idea
 .project
