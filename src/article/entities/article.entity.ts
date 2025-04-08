@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
   Index,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
@@ -41,4 +43,22 @@ export class Article {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // 多对多关系: 用户喜欢文章
+  @ManyToMany(() => User, (user) => user.likedArticles)
+  @JoinTable({
+    name: 'article_likes',
+    joinColumn: { name: 'article_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  likedBy: User[];
+
+  // 多对多关系: 用户收藏文章
+  @ManyToMany(() => User, (user) => user.favoritedArticles)
+  @JoinTable({
+    name: 'article_favorites',
+    joinColumn: { name: 'article_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  favoritedBy: User[];
 }
