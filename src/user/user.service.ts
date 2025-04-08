@@ -66,7 +66,6 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: { walletAddress },
     });
-    console.log('user', user);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -84,7 +83,12 @@ export class UserService {
     user.nonce = '';
     await this.userRepository.save(user);
     // 生成 JWT token，包含钱包地址与角色
-    const payload = { walletAddress: user.walletAddress, role: user.role };
+
+    const payload = {
+      walletAddress: user.walletAddress,
+      role: user.role,
+      id: user.id,
+    };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
     });
