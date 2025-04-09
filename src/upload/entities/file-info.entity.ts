@@ -12,7 +12,7 @@ export class FileInfo {
   id: string;
 
   @Column({ nullable: true })
-  courseId: string;
+  correlationId: string;
 
   @Column({ nullable: true })
   title: string;

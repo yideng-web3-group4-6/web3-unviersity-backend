@@ -10,7 +10,6 @@ import {
   CourseChildrenResponse,
   CourseFileResponse,
 } from '@/course/dto/course.dto';
-import { CourseInfo } from '@/course/entities/course.entity';
 
 @Injectable()
 export class UploadService {
@@ -23,8 +22,6 @@ export class UploadService {
     private configService: ConfigService,
     @InjectRepository(FileInfo)
     private readonly fileInfoRepository: Repository<FileInfo>,
-    @InjectRepository(CourseInfo)
-    private readonly courseInfoRepository: Repository<CourseInfo>,
   ) {
     this.region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
@@ -49,16 +46,10 @@ export class UploadService {
   }
 
   async uploadFile(
-    courseId: string,
+    correlationId: string,
     file: Express.Multer.File,
     title: string,
   ): Promise<FileInfo> {
-    const courseInfo = await this.courseInfoRepository.findOne({
-      where: { id: courseId },
-    });
-    if (!courseInfo) {
-      throw new NotFoundException('课程ID不存在');
-    }
     /* 
     TODO:
       1. 根据数据ID验证文件类型，图片类型用于封面，视频类型用于课程内容
@@ -67,7 +58,7 @@ export class UploadService {
         参数为false时，不替换封面，有报错提示
     */
 
-    const key = `uploads/${courseId}-${file.originalname}`;
+    const key = `uploads/${correlationId}-${file.originalname}`;
     this.logger.debug(
       `Attempting to upload file: ${key} to bucket: ${this.bucketName}`,
     );
@@ -88,7 +79,7 @@ export class UploadService {
 
       // 保存文件信息到数据库
       const fileInfo = new FileInfo();
-      fileInfo.courseId = courseId;
+      fileInfo.correlationId = correlationId;
       fileInfo.title = title;
       fileInfo.originalName = file.originalname;
       fileInfo.mimeType = file.mimetype;
@@ -105,17 +96,17 @@ export class UploadService {
   }
 
   async getSignedUrl(
-    courseId: string,
+    correlationId: string,
     expiresIn = 3600,
   ): Promise<CourseFileResponse> {
     try {
       const fileInfo = await this.fileInfoRepository.find({
-        where: { courseId },
+        where: { correlationId },
         order: { createdAt: 'DESC' },
       });
 
       if (fileInfo.length === 0) {
-        this.logger.warn(`No files found for courseId: ${courseId}`);
+        this.logger.warn(`No files found for courseId: ${correlationId}`);
         return { fileData: [], coursesImage: '' };
       }
 

@@ -29,13 +29,13 @@ import {
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post('course/:id')
-  @ApiOperation({ summary: '上传课程文件到 AWS S3' })
-  @ApiParam({ name: 'id', description: '课程ID' })
+  @Post(':id')
+  @ApiOperation({ summary: '上传文件到 AWS S3' })
+  @ApiParam({ name: 'id', description: '关联的数据ID' })
   @ApiQuery({
     name: 'title',
     required: false,
-    description: '课程标题',
+    description: '标题',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
