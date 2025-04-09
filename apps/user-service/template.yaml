@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "SAM Template"
+Description: 'SAM Template'
 
 Globals:
   Function:
@@ -13,7 +13,7 @@ Resources:
   UserServiceFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: user-service
+      FunctionName: !Ref AWS::StackName
       Handler: main.handler
       CodeUri: ../../dist-lambda/apps/user-service/
       MemorySize: 256
@@ -26,3 +26,4 @@ Resources:
       Environment:
         Variables:
           NODE_ENV: production
+          AWS_REGION: !Ref AWS::Region

@@ -3,7 +3,7 @@ version = 0.1
 [default]
 stack_name = "user-service"
 region = "ap-southeast-1"
-s3_bucket = "your-s3-bucket-name"
+s3_bucket = your-s3-bucket-name
 s3_prefix = "user-service"
 capabilities = ["CAPABILITY_IAM"]
 confirm_changeset = true
