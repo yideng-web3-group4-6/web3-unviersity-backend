@@ -101,10 +101,6 @@ export class CourseController {
     status: 200,
     description: '获取课程详情成功',
   })
-  @ApiResponse({
-    status: 404,
-    description: '课程不存在',
-  })
   async getTest(): Promise<any> {
     return {
       code: 200,
