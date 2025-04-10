@@ -35,7 +35,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/project/web3-university-backend/
+            source ~/.bashrc
+            export NODE_PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/lib/node_modules
+            export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v22.14.0/bin"
             git pull origin feature/ec2
-            pnpm install
-            pnpm build
-            pm2 restart web3-university-api   
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm install
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm build
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart web3-university-api 
