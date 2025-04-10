@@ -1,0 +1,38 @@
+name: Nest.js CI/CD
+
+on:
+  push:
+    branches:
+      - ec2
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Nest.js app
+        run: pnpm build
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.0.1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/project/web3-university-backend/
+            git pull origin ec2
+            pnpm install
+            pnpm build
+            pm2 restart web3-university-backend   
