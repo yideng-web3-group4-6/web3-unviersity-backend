@@ -94,18 +94,18 @@ export class CourseController {
 
   @Get('test')
   @ApiOperation({
-    summary: '获取课程详情',
-    description: '根据课程ID获取课程的详细信息',
+    summary: '测试接口', // 可以更新一下描述
+    description: '这是一个简单的测试接口，直接返回成功',
   })
   @ApiResponse({
     status: 200,
-    description: '获取课程详情成功',
+    description: '测试成功1123', // 可以更新一下描述
   })
   async getTest(): Promise<any> {
     return {
       code: 200,
       message: 'success',
-      data: 'test',
+      data: 'test endpoint reached successfully',
     };
   }
 }
