@@ -99,7 +99,7 @@ export class CourseController {
   })
   @ApiResponse({
     status: 200,
-    description: '测试成功1123', // 可以更新一下描述
+    description: '测试成功ci/cd123', // 可以更新一下描述
   })
   async getTest(): Promise<any> {
     return {
