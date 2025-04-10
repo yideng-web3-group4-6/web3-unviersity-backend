@@ -3,7 +3,7 @@ name: Nest.js CI/CD
 on:
   push:
     branches:
-      - c
+      - feature/ec2
 
 jobs:
   build-and-deploy:
@@ -32,7 +32,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/project/web3-university-backend/
-            git pull origin pm2 save
+            git pull origin feature/ec2
             pnpm install
             pnpm build
             pm2 restart web3-university-api   
