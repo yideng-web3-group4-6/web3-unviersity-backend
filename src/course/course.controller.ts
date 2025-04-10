@@ -91,4 +91,25 @@ export class CourseController {
       data: result,
     };
   }
+
+  @Get('test')
+  @ApiOperation({
+    summary: '获取课程详情',
+    description: '根据课程ID获取课程的详细信息',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取课程详情成功',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '课程不存在',
+  })
+  async getTest(): Promise<any> {
+    return {
+      code: 200,
+      message: 'success',
+      data: 'test',
+    };
+  }
 }
