@@ -13,6 +13,7 @@ export class DatabaseInitService {
   }
 
   async initDatabase() {
+    console.log('当前生产环境', process.env.NODE_ENV);
     if (process.env.NODE_ENV === 'production') {
       this.logger.log('生产环境不进行数据库初始化');
       return;

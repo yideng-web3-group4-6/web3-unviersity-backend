@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "web3-university-api",
+      "script": "dist/main.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
