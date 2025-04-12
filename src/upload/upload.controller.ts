@@ -29,8 +29,14 @@ import {
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post()
+  @Post(':id')
   @ApiOperation({ summary: '上传文件到 AWS S3' })
+  @ApiParam({ name: 'id', description: '关联的数据ID' })
+  @ApiQuery({
+    name: 'title',
+    required: false,
+    description: '标题',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -49,6 +55,7 @@ export class UploadController {
   @ApiResponse({ status: 400, description: '无效的文件格式或大小' })
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
+    @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -63,7 +70,7 @@ export class UploadController {
     @Query('title') title?: string,
   ) {
     try {
-      const fileInfo = await this.uploadService.uploadFile(file, title);
+      const fileInfo = await this.uploadService.uploadFile(id, file, title);
       return {
         success: true,
         message: '文件上传成功',
