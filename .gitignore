@@ -24,6 +24,9 @@ uploads
 .project
 .classpath
 .c9/
+.nx
+dist-lambda
+.aws-sam
 *.launch
 .settings/
 *.sublime-workspace

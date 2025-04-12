@@ -46,19 +46,10 @@ export class UploadService {
   }
 
   async uploadFile(
-    correlationId: string,
     file: Express.Multer.File,
     title: string,
   ): Promise<FileInfo> {
-    /* 
-    TODO:
-      1. 根据数据ID验证文件类型，图片类型用于封面，视频类型用于课程内容
-      2. 需要一个参数控制封面是否替换，默认值为false，一个课程数据只能有一个封面
-        参数为true时，替换封面，如果没有封面，则添加封面
-        参数为false时，不替换封面，有报错提示
-    */
-
-    const key = `uploads/${correlationId}-${file.originalname}`;
+    const key = `uploads/${file.originalname}`;
     this.logger.debug(
       `Attempting to upload file: ${key} to bucket: ${this.bucketName}`,
     );
@@ -79,7 +70,6 @@ export class UploadService {
 
       // 保存文件信息到数据库
       const fileInfo = new FileInfo();
-      fileInfo.correlationId = correlationId;
       fileInfo.title = title;
       fileInfo.originalName = file.originalname;
       fileInfo.mimeType = file.mimetype;
