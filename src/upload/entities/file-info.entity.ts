@@ -12,6 +12,9 @@ export class FileInfo {
   id: string;
 
   @Column({ nullable: true })
+  correlationId: string;
+
+  @Column({ nullable: true })
   title: string;
 
   @Column()
