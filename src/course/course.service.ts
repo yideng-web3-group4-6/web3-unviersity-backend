@@ -89,7 +89,16 @@ export class CourseService {
         take: pageSize,
       });
 
-      return { courses, total };
+      const updatedCourses = await Promise.all(
+        courses.map(async (course) => {
+          const { coursesImage } = await this.uploadService.getSignedUrl(
+            course.id,
+          );
+          return { ...course, coverImage: coursesImage };
+        }),
+      );
+
+      return { courses: updatedCourses, total };
     } catch (error) {
       this.logger.error('获取课程列表时发生错误: ', error);
       throw error;
