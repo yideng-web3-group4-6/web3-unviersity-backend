@@ -41,6 +41,12 @@ export class CourseUploadConfirmDto {
   price: number;
 
   @ApiProperty({
+    description: '封面url',
+  })
+  @IsString()
+  coverImage?: string;
+
+  @ApiProperty({
     description: '课程标签',
     example: 'Solidity,Remix,Hardhat',
   })
@@ -288,7 +294,7 @@ export class CourseFileResponse {
   @ApiProperty({
     description: '课程集合',
   })
-  fileData: CourseChildrenResponse[];
+  fileData?: CourseChildrenResponse[];
 
   @ApiProperty({
     description: '封面url',
