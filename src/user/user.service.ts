@@ -61,16 +61,21 @@ export class UserService {
     walletAddress: string,
     signature: string,
   ): Promise<string> {
+    const EXPECTED_CHAIN_ID = 1; // Ethereum Mainnet
+    const DOMAIN = 'yideng.university'; // 应与你服务实际域名匹配
+      
     const user = await this.userRepository.findOne({
       where: { walletAddress },
     });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
+    // 使用结构化消息格式构造消息
+    const message = `Domain: ${DOMAIN}\nWallet: ${walletAddress}\nNonce: ${user.nonce}\nChainId: ${EXPECTED_CHAIN_ID}`;
     // 使用 ethers.verifyMessage 验证签名是否有效
     let recoveredAddress: string;
     try {
-      recoveredAddress = verifyMessage(user.nonce, signature);
+      recoveredAddress = verifyMessage(message, signature);
     } catch (error) {
       throw new UnauthorizedException('Invalid signature');
     }
