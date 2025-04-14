@@ -83,12 +83,21 @@ export class UserService {
     if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
       throw new UnauthorizedException('Signature verification failed');
     }
-    // 清空 nonce，防止重放攻击
-    user.nonce = '';
-    await this.userRepository.save(user);
-    // 生成 JWT token，包含钱包地址与角色
-    const payload = { walletAddress: user.walletAddress, role: user.role };
-    return this.jwtService.sign(payload);
+    try {
+      user.nonce = '';
+      await this.userRepository.save(user);
+    } catch (err) {
+      this.logger.error('Failed to save user nonce:', err);
+      throw new UnauthorizedException('Server error');
+    }
+
+    try {
+      const payload = { walletAddress: user.walletAddress, role: user.role };
+      return this.jwtService.sign(payload);
+    } catch (err) {
+      this.logger.error('Failed to generate JWT token:', err);
+      throw new UnauthorizedException('Token generation failed');
+    }
   }
 
   /**
