@@ -46,7 +46,7 @@ export class UserController {
       throw new UnauthorizedException('缺少钱包地址');
     }
     const nonce = await this.userService.generateNonce(walletAddress);
-    return { nonce };
+    return { code: 0, message: '获取 nonce 成功', data: { nonce } };
   }
 
   @Post('login')
@@ -68,7 +68,7 @@ export class UserController {
   async login(@Body() body: { walletAddress: string; signature: string }) {
     const { walletAddress, signature } = body;
     const token = await this.userService.validateUser(walletAddress, signature);
-    return { access_token: token };
+    return { code: 0, message: '登录成功', data: { access_token: token } };
   }
 
   // 以下为更新用户信息接口，可根据需要启用
@@ -95,6 +95,6 @@ export class UserController {
       walletAddress,
       updateUserDto,
     );
-    return { message: '用户信息更新成功', data: updatedUser };
+    return { code: 0, message: '用户信息更新成功', data: updatedUser };
   }
 }
