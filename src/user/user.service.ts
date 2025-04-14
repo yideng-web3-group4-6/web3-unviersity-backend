@@ -44,6 +44,10 @@ export class UserService {
    */
   async generateNonce(walletAddress: string): Promise<string> {
     const user = await this.findOrCreateUser(walletAddress);
+    // 如果用户已有有效 nonce，则复用它（防止频繁签名）
+    if (user.nonce && user.nonce.length > 0) {
+      return user.nonce;
+    }
     const nonce = Math.random().toString(36).substring(2, 15); // 生成随机字符串
     user.nonce = nonce;
     await this.userRepository.save(user);
@@ -61,21 +65,18 @@ export class UserService {
     walletAddress: string,
     signature: string,
   ): Promise<string> {
-    const EXPECTED_CHAIN_ID = 1; // Ethereum Mainnet
-    const DOMAIN = 'yideng.university'; // 应与你服务实际域名匹配
-      
     const user = await this.userRepository.findOne({
       where: { walletAddress },
     });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    // 使用结构化消息格式构造消息
-    const message = `Domain: ${DOMAIN}\nWallet: ${walletAddress}\nNonce: ${user.nonce}\nChainId: ${EXPECTED_CHAIN_ID}`;
     // 使用 ethers.verifyMessage 验证签名是否有效
     let recoveredAddress: string;
     try {
-      recoveredAddress = verifyMessage(message, signature);
+      recoveredAddress = verifyMessage(user.nonce, signature);
+      console.log('🚀 ~ UserService ~ recoveredAddress:', recoveredAddress);
+      console.log('🚀 ~ UserService ~ walletAddress:', walletAddress);
     } catch (error) {
       throw new UnauthorizedException('Invalid signature');
     }
