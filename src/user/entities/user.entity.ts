@@ -1,9 +1,11 @@
+import { Article } from '../../article/entities/article.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
 } from 'typeorm';
 
 @Entity('users')
@@ -35,4 +37,11 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // 多对多关系: 用户喜欢文章
+  @ManyToMany(() => Article, (article) => article.likedBy)
+  likedArticles: Article[];
+
+  @ManyToMany(() => Article, (article) => article.favoritedBy)
+  favoritedArticles: Article[];
 }

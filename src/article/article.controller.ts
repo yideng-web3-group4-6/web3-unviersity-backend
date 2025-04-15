@@ -11,9 +11,13 @@ import {
   Req,
   ForbiddenException,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { SearchArticleDto } from './dto/search-article.dto';
+import { ArticleItemReturnDto, ArticleListReturnDto } from './dto/return.dto';
+
 import {
   ApiTags,
   ApiOperation,
@@ -22,29 +26,54 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Article')
 @Controller('article')
+@UseGuards(AuthGuard('jwt'))
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new article' })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: CreateArticleDto })
   @ApiResponse({ status: 201, description: 'Article created successfully' })
   async createArticle(@Body() dto: CreateArticleDto, @Req() req) {
     const user = req.user;
-    return await this.articleService.createArticle(dto, user.id);
+    return await this.articleService.createArticle(dto, user.walletAddress);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Get articles by conditions' })
+  @ApiBody({
+    type: SearchArticleDto,
+    description: '搜索条件',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Articles retrieved successfully',
+    type: ArticleListReturnDto,
+  })
+  async getArticlesByConditions(
+    @Body() searchArticleDto: SearchArticleDto,
+  ): Promise<ArticleListReturnDto> {
+    return await this.articleService.searchArticlesByConditions(
+      searchArticleDto,
+    );
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get article by ID' })
   @ApiParam({ name: 'id', description: 'Article ID', example: 1 })
-  @ApiResponse({ status: 200, description: 'Article retrieved successfully' })
-  async getArticleById(@Param('id', ParseIntPipe) id: number) {
+  @ApiResponse({
+    status: 200,
+    description: 'Article retrieved successfully',
+    type: SearchArticleDto,
+  })
+  async getArticleById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ArticleItemReturnDto> {
     return await this.articleService.getArticleById(id);
   }
 
@@ -59,7 +88,6 @@ export class ArticleController {
   @ApiOperation({ summary: 'Update an article' })
   @ApiParam({ name: 'id', description: 'Article ID', example: 1 })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: UpdateArticleDto })
   @ApiResponse({ status: 200, description: 'Article updated successfully' })
   async updateArticle(
@@ -84,7 +112,6 @@ export class ArticleController {
   @ApiOperation({ summary: 'Delete an article' })
   @ApiParam({ name: 'id', description: 'Article ID', example: 1 })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiResponse({ status: 200, description: 'Article deleted successfully' })
   async deleteArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
     const user = req.user;
@@ -99,5 +126,61 @@ export class ArticleController {
     }
     await this.articleService.deleteArticle(id);
     return { message: `Article ${id} deleted successfully` };
+  }
+
+  @Get('like/:id')
+  @ApiOperation({ summary: 'liked articles' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
+  async likeArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const user = req.user;
+    if (!user) {
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
+    }
+    return await this.articleService.likeArticle(id, user.id);
+  }
+
+  @Get('unlike/:id')
+  @ApiOperation({ summary: 'unliked articles' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
+  async unlikedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const user = req.user;
+    if (!user) {
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
+    }
+    return await this.articleService.unlikeArticle(id, user.id);
+  }
+
+  @Get('favorite/:id')
+  @ApiOperation({ summary: 'favorited articles' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
+  async favoritedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const user = req.user;
+    if (!user) {
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
+    }
+    return await this.articleService.favoriteArticle(id, user.id);
+  }
+
+  @Get('unfavorite/:id')
+  @ApiOperation({ summary: 'unfavorited articles' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Articles retrieved successfully' })
+  async unfavoritedArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const user = req.user;
+    if (!user) {
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
+    }
+    return await this.articleService.unfavoriteArticle(id, user.id);
   }
 }
