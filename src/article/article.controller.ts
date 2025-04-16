@@ -29,7 +29,7 @@ import {
 
 @ApiTags('Article')
 @Controller('article')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
