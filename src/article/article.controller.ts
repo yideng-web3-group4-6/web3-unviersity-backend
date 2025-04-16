@@ -97,10 +97,7 @@ export class ArticleController {
   ) {
     const user = req.user;
     const article = await this.articleService.getArticleById(id);
-    if (
-      !article.author ||
-      (article.author.id !== user.id && user.role !== 'admin')
-    ) {
+    if (!article.author || article.author.id !== user.id) {
       throw new ForbiddenException(
         'You are not authorized to update this article',
       );
