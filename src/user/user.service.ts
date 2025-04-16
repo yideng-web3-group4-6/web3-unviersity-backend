@@ -127,7 +127,11 @@ export class UserService {
    * @returns 包含 access_token 的对象
    */
   async login(user: User): Promise<{ access_token: string }> {
-    const payload = { walletAddress: user.walletAddress, role: user.role };
+    const payload = {
+      walletAddress: user.walletAddress,
+      role: user.role,
+      id: user.id,
+    };
     return { access_token: this.jwtService.sign(payload) };
   }
 }
