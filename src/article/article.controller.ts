@@ -97,7 +97,12 @@ export class ArticleController {
   ) {
     const user = req.user;
     const article = await this.articleService.getArticleById(id);
-    if (!article.author || article.author.id !== user.id) {
+    if (
+      !article.author ||
+      article.author.walletAddress !== user.walletAddress
+    ) {
+      // console.log('>>>>', article.author.walletAddress, user.walletAddress);
+
       throw new ForbiddenException(
         'You are not authorized to update this article',
       );
@@ -115,7 +120,7 @@ export class ArticleController {
     const article = await this.articleService.getArticleById(id);
     if (
       !article.author ||
-      (article.author.id !== user.id && user.role !== 'admin')
+      article.author.walletAddress !== user.walletAddress
     ) {
       throw new ForbiddenException(
         'You are not authorized to delete this article',
@@ -136,7 +141,7 @@ export class ArticleController {
         'You are not authorized to access this resource',
       );
     }
-    return await this.articleService.likeArticle(id, user.id);
+    return await this.articleService.likeArticle(id, user.walletAddress);
   }
 
   @Get('unlike/:id')
@@ -150,7 +155,7 @@ export class ArticleController {
         'You are not authorized to access this resource',
       );
     }
-    return await this.articleService.unlikeArticle(id, user.id);
+    return await this.articleService.unlikeArticle(id, user.walletAddress);
   }
 
   @Get('favorite/:id')
@@ -164,7 +169,7 @@ export class ArticleController {
         'You are not authorized to access this resource',
       );
     }
-    return await this.articleService.favoriteArticle(id, user.id);
+    return await this.articleService.favoriteArticle(id, user.walletAddress);
   }
 
   @Get('unfavorite/:id')
@@ -178,6 +183,6 @@ export class ArticleController {
         'You are not authorized to access this resource',
       );
     }
-    return await this.articleService.unfavoriteArticle(id, user.id);
+    return await this.articleService.unfavoriteArticle(id, user.walletAddress);
   }
 }

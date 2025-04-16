@@ -166,11 +166,18 @@ export class ArticleService {
    * @returns 返回更新后的文章实体
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async likeArticle(articleId: number, userId: number): Promise<Article> {
+  async likeArticle(
+    articleId: number,
+    walletAddress: string,
+  ): Promise<Article> {
     const article = await this.getArticleById(articleId);
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { walletAddress: walletAddress },
+    });
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(
+        `User with walletAddress ${walletAddress} not found`,
+      );
     }
     article.likedBy = [...article.likedBy, user];
     return await this.articleRepository.save(article);
@@ -183,9 +190,14 @@ export class ArticleService {
    * @returns 返回更新后的文章实体
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async unlikeArticle(articleId: number, userId: number): Promise<Article> {
+  async unlikeArticle(
+    articleId: number,
+    walletAddress: string,
+  ): Promise<Article> {
     const article = await this.getArticleById(articleId);
-    article.likedBy = article.likedBy.filter((user) => user.id !== userId);
+    article.likedBy = article.likedBy.filter(
+      (user) => user.walletAddress !== walletAddress,
+    );
     return await this.articleRepository.save(article);
   }
   /**
@@ -195,12 +207,19 @@ export class ArticleService {
    * @returns 返回更新后的文章实体
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async favoriteArticle(articleId: number, userId: number): Promise<Article> {
+  async favoriteArticle(
+    articleId: number,
+    walletAddress: string,
+  ): Promise<Article> {
     const article = await this.getArticleById(articleId);
 
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { walletAddress: walletAddress },
+    });
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(
+        `User with walletAddress ${walletAddress} not found`,
+      );
     }
     article.favoritedBy = [...article.favoritedBy, user];
     return await this.articleRepository.save(article);
@@ -212,10 +231,13 @@ export class ArticleService {
    * @returns 返回更新后的文章实体
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async unfavoriteArticle(articleId: number, userId: number): Promise<Article> {
+  async unfavoriteArticle(
+    articleId: number,
+    walletAddress: string,
+  ): Promise<Article> {
     const article = await this.getArticleById(articleId);
     article.favoritedBy = article.favoritedBy.filter(
-      (user) => user.id !== userId,
+      (user) => user.walletAddress !== walletAddress,
     );
     return await this.articleRepository.save(article);
   }
