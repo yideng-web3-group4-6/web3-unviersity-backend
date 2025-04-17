@@ -97,4 +97,25 @@ export class UserController {
     );
     return { code: 200, message: '用户信息更新成功', data: updatedUser };
   }
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '获取当前登录用户信息',
+    description: '获取当前通过 JWT 鉴权的用户的个人信息。',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '成功返回用户信息',
+    schema: { example: { code: 200, message: '查询成功', data: { walletAddress: '0x123...', nickname: '用户昵称', avatar: '头像链接' } } },
+  })
+  @ApiResponse({ status: 404, description: '用户不存在' })
+  async getProfile(@Req() req) {
+    const walletAddress = req.user.walletAddress;
+    const user = await this.userService.findUserByWalletAddress(walletAddress);
+    if (!user) {
+      throw new UnauthorizedException('用户不存在');
+    }
+    return { code: 200, message: '查询成功', data: user };
+  }
 }

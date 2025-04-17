@@ -134,4 +134,12 @@ export class UserService {
     };
     return { access_token: this.jwtService.sign(payload) };
   }
+  /**
+   * 根据钱包地址查找用户
+   * @param walletAddress 用户钱包地址
+   * @returns User 实体（可能为 undefined）
+   */
+  async findUserByWalletAddress(walletAddress: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({ where: { walletAddress } });
+  }
 }
