@@ -16,7 +16,11 @@ import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { SearchArticleDto } from './dto/search-article.dto';
-import { ArticleItemReturnDto, ArticleListReturnDto } from './dto/return.dto';
+import {
+  ArticleItemReturnDto,
+  ArticleListReturnDto,
+  ResBaseDto,
+} from './dto/return.dto';
 
 import {
   ApiTags,
@@ -38,7 +42,10 @@ export class ArticleController {
   @ApiBearerAuth()
   @ApiBody({ type: CreateArticleDto })
   @ApiResponse({ status: 201, description: 'Article created successfully' })
-  async createArticle(@Body() dto: CreateArticleDto, @Req() req) {
+  async createArticle(
+    @Body() dto: CreateArticleDto,
+    @Req() req,
+  ): Promise<ResBaseDto<ArticleItemReturnDto>> {
     const user = req.user;
     return await this.articleService.createArticle(dto, user.walletAddress);
   }
@@ -57,7 +64,7 @@ export class ArticleController {
   })
   async getArticlesByConditions(
     @Body() searchArticleDto: SearchArticleDto,
-  ): Promise<ArticleListReturnDto> {
+  ): Promise<ResBaseDto<ArticleListReturnDto>> {
     return await this.articleService.searchArticlesByConditions(
       searchArticleDto,
     );
@@ -73,8 +80,8 @@ export class ArticleController {
   })
   async getArticleById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ArticleItemReturnDto> {
-    return await this.articleService.getArticleById(id);
+  ): Promise<ResBaseDto<ArticleItemReturnDto>> {
+    return await this.articleService.getArticleByIdWithResBase(id);
   }
 
   @Get()
@@ -94,7 +101,7 @@ export class ArticleController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateArticleDto,
     @Req() req,
-  ) {
+  ): Promise<ResBaseDto<ArticleItemReturnDto>> {
     const user = req.user;
     const article = await this.articleService.getArticleById(id);
     if (
@@ -115,7 +122,10 @@ export class ArticleController {
   @ApiParam({ name: 'id', description: 'Article ID', example: 1 })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Article deleted successfully' })
-  async deleteArticle(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  async deleteArticle(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
+  ): Promise<ResBaseDto<any>> {
     const user = req.user;
     const article = await this.articleService.getArticleById(id);
     if (
@@ -127,7 +137,12 @@ export class ArticleController {
       );
     }
     await this.articleService.deleteArticle(id);
-    return { message: `Article ${id} deleted successfully` };
+
+    return {
+      message: `Article ${id} deleted successfully`,
+      code: 200,
+      data: null,
+    };
   }
 
   @Get('like/:id')

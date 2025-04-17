@@ -22,3 +22,9 @@ export class ArticleItemReturnDto extends Article {
  * 文章列表返回
  */
 export class ArticleListReturnDto extends CommonListReturnWithPaginationDto<ArticleItemReturnDto> {}
+
+export class ResBaseDto<T> {
+  code: number;
+  message: string;
+  data: T;
+}

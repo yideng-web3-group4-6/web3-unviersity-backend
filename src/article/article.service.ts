@@ -6,7 +6,19 @@ import { Article } from './entities/article.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { SearchArticleDto } from './dto/search-article.dto';
-import { ArticleItemReturnDto, ArticleListReturnDto } from './dto/return.dto';
+import {
+  ArticleItemReturnDto,
+  ArticleListReturnDto,
+  ResBaseDto,
+} from './dto/return.dto';
+
+function wrapRes<T>(data: T, message = 'success', code = 200): ResBaseDto<T> {
+  return {
+    code,
+    message,
+    data,
+  };
+}
 @Injectable()
 export class ArticleService {
   private readonly logger = new Logger(ArticleService.name);
@@ -18,6 +30,17 @@ export class ArticleService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  async getArticleById(id: number): Promise<ArticleItemReturnDto> {
+    const article = await this.articleRepository.findOne({
+      where: { id },
+      relations: ['author', 'likedBy', 'favoritedBy'],
+    });
+    if (!article) {
+      throw new NotFoundException(`Article with ID ${id} not found`);
+    }
+
+    return article;
+  }
   /**
    * 创建新文章
    * @param dto - 创建文章的数据传输对象
@@ -27,7 +50,7 @@ export class ArticleService {
   async createArticle(
     dto: CreateArticleDto,
     walletAddress?: string,
-  ): Promise<Article> {
+  ): Promise<ResBaseDto<Article>> {
     const article = this.articleRepository.create(dto);
     if (walletAddress) {
       // article.author = { id: authorId } as any;
@@ -40,7 +63,9 @@ export class ArticleService {
         article.author = author;
       }
     }
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+
+    return wrapRes(res);
   }
 
   /**
@@ -49,16 +74,9 @@ export class ArticleService {
    * @returns 返回文章实体，包含作者、点赞和收藏信息
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async getArticleById(id: number): Promise<ArticleItemReturnDto> {
-    const article = await this.articleRepository.findOne({
-      where: { id },
-      relations: ['author', 'likedBy', 'favoritedBy'],
-    });
-    if (!article) {
-      throw new NotFoundException(`Article with ID ${id} not found`);
-    }
-
-    return article;
+  async getArticleByIdWithResBase(id: number) {
+    const article = await this.getArticleById(id);
+    return wrapRes(article);
   }
 
   /**
@@ -78,7 +96,7 @@ export class ArticleService {
    */
   async searchArticlesByConditions(
     searchArticleDto: SearchArticleDto,
-  ): Promise<ArticleListReturnDto> {
+  ): Promise<ResBaseDto<ArticleListReturnDto>> {
     const {
       title,
       status,
@@ -151,12 +169,14 @@ export class ArticleService {
       .take(pageSize)
       .getMany();
 
-    return {
+    const res = {
       list: items,
       total,
       page,
       pageSize,
     };
+
+    return wrapRes(res);
   }
 
   /**
@@ -169,7 +189,7 @@ export class ArticleService {
   async likeArticle(
     articleId: number,
     walletAddress: string,
-  ): Promise<Article> {
+  ): Promise<ResBaseDto<Article>> {
     const article = await this.getArticleById(articleId);
     const user = await this.userRepository.findOne({
       where: { walletAddress: walletAddress },
@@ -180,7 +200,8 @@ export class ArticleService {
       );
     }
     article.likedBy = [...article.likedBy, user];
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+    return wrapRes(res);
   }
 
   /**
@@ -193,12 +214,13 @@ export class ArticleService {
   async unlikeArticle(
     articleId: number,
     walletAddress: string,
-  ): Promise<Article> {
+  ): Promise<ResBaseDto<Article>> {
     const article = await this.getArticleById(articleId);
     article.likedBy = article.likedBy.filter(
       (user) => user.walletAddress !== walletAddress,
     );
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+    return wrapRes(res);
   }
   /**
    * 用户收藏文章
@@ -210,7 +232,7 @@ export class ArticleService {
   async favoriteArticle(
     articleId: number,
     walletAddress: string,
-  ): Promise<Article> {
+  ): Promise<ResBaseDto<Article>> {
     const article = await this.getArticleById(articleId);
 
     const user = await this.userRepository.findOne({
@@ -222,7 +244,9 @@ export class ArticleService {
       );
     }
     article.favoritedBy = [...article.favoritedBy, user];
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+
+    return wrapRes(res);
   }
   /**
    * 用户取消收藏文章
@@ -234,12 +258,13 @@ export class ArticleService {
   async unfavoriteArticle(
     articleId: number,
     walletAddress: string,
-  ): Promise<Article> {
+  ): Promise<ResBaseDto<Article>> {
     const article = await this.getArticleById(articleId);
     article.favoritedBy = article.favoritedBy.filter(
       (user) => user.walletAddress !== walletAddress,
     );
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+    return wrapRes(res);
   }
   /**
    * 更新文章信息
@@ -248,10 +273,15 @@ export class ArticleService {
    * @returns 返回更新后的文章实体
    * @throws NotFoundException - 当文章不存在时抛出异常
    */
-  async updateArticle(id: number, dto: UpdateArticleDto): Promise<Article> {
+  async updateArticle(
+    id: number,
+    dto: UpdateArticleDto,
+  ): Promise<ResBaseDto<ArticleItemReturnDto>> {
     const article = await this.getArticleById(id);
     Object.assign(article, dto);
-    return await this.articleRepository.save(article);
+    const res = await this.articleRepository.save(article);
+
+    return wrapRes(res);
   }
 
   /**
